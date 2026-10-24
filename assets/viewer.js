@@ -44312,6 +44312,15 @@ void main(void)\r
   var exps = [];
   var expParams = /* @__PURE__ */ new Map();
   var expName = null;
+  var gazeX = 0;
+  var gazeY = 0;
+  var pokeAt = 0;
+  var sayFade = 0;
+  var motionGroups = [];
+  var nextMotionAt = 0;
+  var POKE_HEAD = ["\u5514\u3002", "\u522B\u6478\u3002", "\u5934\u53D1\u4E71\u4E86\u3002", "\u55EF\u2026\u2026", "\u4F60\u624B\u51C9\u3002"];
+  var POKE_BODY = ["\u770B\u4EC0\u4E48\u770B\u3002", "\u6233\u4EC0\u4E48\u3002", "\u54FC\u3002", "\u522B\u95F9\u3002"];
+  var POKE_LOW = ["\u5728\u5462\u3002", "\u6709\u4E8B\uFF1F", "\u600E\u4E48\u4E86\u3002"];
   var base = {};
   var BASE_IDS = ["ParamMouthForm", "ParamMouthOpenY", "ParamBrowLY", "ParamBrowRY", "ParamBrowLAngle", "ParamBrowRAngle", "ParamEyeLSmile", "ParamEyeRSmile", "ParamEyeLOpen", "ParamEyeROpen", "ParamEyeBallX", "ParamEyeBallY", "ParamAngleX", "ParamAngleY", "ParamAngleZ"];
   for (const id of BASE_IDS) base[id] = 0;
@@ -44361,6 +44370,13 @@ void main(void)\r
     exps = entry.expressions || [];
     expParams = /* @__PURE__ */ new Map();
     expName = null;
+    try {
+      const defs = model.internalModel && model.internalModel.motionManager && model.internalModel.motionManager.definitions || {};
+      motionGroups = Object.keys(defs).filter((k2) => Array.isArray(defs[k2]) && defs[k2].length);
+    } catch {
+      motionGroups = [];
+    }
+    nextMotionAt = performance.now() + 6e3;
     renderExps();
     fit();
     applyMood("\u5E73\u9759");
@@ -44440,13 +44456,22 @@ void main(void)\r
   function say(text, m2) {
     if (m2) applyMood(m2);
     const bubble = $2("bubble");
+    let s2 = String(text == null ? "" : text).replace(/\s+/g, " ").trim();
+    if (s2.length > 180) s2 = s2.slice(0, 178) + "\u2026";
     bubble.textContent = "";
+    bubble.style.opacity = "1";
+    clearTimeout(sayFade);
     let i2 = 0;
     const t2 = setInterval(() => {
-      bubble.textContent = text.slice(0, ++i2);
+      bubble.textContent = s2.slice(0, ++i2);
       mouth = 0.14;
-      if (i2 >= text.length) clearInterval(t2);
-    }, 65);
+      if (i2 >= s2.length) {
+        clearInterval(t2);
+        sayFade = setTimeout(() => {
+          bubble.style.opacity = "0";
+        }, Math.min(14e3, 4e3 + s2.length * 110));
+      }
+    }, 55);
   }
   var idleIdx = 0;
   function idleTick() {
@@ -44483,17 +44508,33 @@ void main(void)\r
       }
     }
     setP("ParamBreath", (Math.sin(t2 * 1.1) + 1) / 2);
+    const gx = Math.max(-1, Math.min(1, gazeX));
+    const gy = Math.max(-1, Math.min(1, gazeY));
+    setP("ParamEyeBallX", gx * 0.9);
+    setP("ParamEyeBallY", -gy * 0.65);
     if (!window.__holdHead) {
-      setP("ParamAngleX", Math.sin(t2 * 0.43) * 4);
-      setP("ParamAngleY", Math.sin(t2 * 0.31 + 1) * 3);
-      setP("ParamBodyAngleX", Math.sin(t2 * 0.29) * 2);
+      setP("ParamAngleX", Math.sin(t2 * 0.43) * 1.4 + gx * 7);
+      setP("ParamAngleY", Math.sin(t2 * 0.31 + 1) * 1.2 - gy * 5);
+      setP("ParamBodyAngleX", Math.sin(t2 * 0.29) * 2 + gx * 2);
     }
+    maybeMotion();
     if (mouth > 0) {
       mouth = Math.max(0, mouth - app.ticker.deltaMS / 1e3);
       setP("ParamMouthOpenY", (Math.sin(t2 * 18) * 0.5 + 0.5) * 0.26 + 0.02);
     }
     core.update();
   });
+  function maybeMotion() {
+    if (!model || !motionGroups.length) return;
+    const now = performance.now();
+    if (now < nextMotionAt) return;
+    nextMotionAt = now + 12e3 + Math.random() * 16e3;
+    const g2 = motionGroups.indexOf("Idle") >= 0 ? "Idle" : motionGroups[Math.floor(Math.random() * motionGroups.length)];
+    try {
+      model.motion(g2, void 0, 3);
+    } catch {
+    }
+  }
   window.addEventListener("resize", () => setTimeout(fit, 60));
   refresh(true).then(() => {
     if (state.models.length) setTimeout(idleTick, 2500);
@@ -44562,6 +44603,62 @@ void main(void)\r
     const d2 = e2.data || {};
     if (d2.type === "dsh-live2d/bg") applyBg(String(d2.bg || "none"));
   });
+  window.addEventListener("pointermove", (e2) => {
+    if (e2.target && e2.target.id === "bubble") return;
+    gazeX = e2.clientX / Math.max(1, window.innerWidth) * 2 - 1;
+    gazeY = e2.clientY / Math.max(1, window.innerHeight) * 2 - 1;
+  });
+  window.addEventListener("pointerleave", () => {
+    gazeX = 0;
+    gazeY = 0;
+  });
+  var pokeIdx = 0;
+  $2("stage").addEventListener("pointerdown", (e2) => {
+    if (!core) return;
+    const now = Date.now();
+    if (now - pokeAt < 800) return;
+    pokeAt = now;
+    const h2 = Math.max(1, app.renderer.height);
+    const rel = e2.clientY / h2;
+    if (rel < 0.42) say(POKE_HEAD[pokeIdx++ % POKE_HEAD.length], "\u5BB3\u7F9E");
+    else if (rel < 0.75) say(POKE_BODY[pokeIdx++ % POKE_BODY.length], "\u751F\u6C14");
+    else say(POKE_LOW[pokeIdx++ % POKE_LOW.length], "\u5F00\u5FC3");
+  });
+  (function dragBubble() {
+    const b2 = $2("bubble");
+    if (!b2) return;
+    let bx = 0;
+    let by = 0;
+    try {
+      const s2 = JSON.parse(localStorage.getItem("dsh-l2d-bub") || "{}");
+      bx = Number(s2.x) || 0;
+      by = Number(s2.y) || 0;
+      b2.style.transform = "translate(" + bx + "px," + by + "px)";
+    } catch {
+    }
+    b2.addEventListener("pointerdown", (e2) => {
+      e2.preventDefault();
+      const sx = e2.clientX;
+      const sy = e2.clientY;
+      const x0 = bx;
+      const y0 = by;
+      const move = (ev) => {
+        bx = x0 + ev.clientX - sx;
+        by = y0 + ev.clientY - sy;
+        b2.style.transform = "translate(" + bx + "px," + by + "px)";
+      };
+      const up = () => {
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", up);
+        try {
+          localStorage.setItem("dsh-l2d-bub", JSON.stringify({ x: Math.round(bx), y: Math.round(by) }));
+        } catch {
+        }
+      };
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", up);
+    });
+  })();
 })();
 /*! Bundled license information:
 
