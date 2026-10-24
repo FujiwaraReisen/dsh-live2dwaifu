@@ -1,0 +1,29 @@
+{
+  "id": "xialing-001",
+  "name": "夏铃",
+  "version": "1.0.0",
+  "license": "随本插件以 MIT 分发；图由 LFR 用 Seedream 生成",
+  "note": "Q 版三头身，白大褂 + 红高领毛衣 + 黑裤，淡灰虹膜，细黑框眼镜。",
+  "items": [
+    { "file": "deyi.jpg", "label": "得意", "moods": ["开心"] },
+    { "file": "shengqi.jpg", "label": "生气", "moods": ["生气"] },
+    { "file": "haixiu.jpg", "label": "害羞", "moods": ["害羞"] },
+    { "file": "kun.jpg", "label": "困", "moods": ["困"] },
+    { "file": "wuyu.jpg", "label": "无语", "moods": ["无语"] },
+    { "file": "jingya.jpg", "label": "惊讶", "moods": ["惊讶"] },
+    { "file": "kaixin.jpg", "label": "开心", "moods": ["开心"] },
+    { "file": "sikao.jpg", "label": "想事情", "moods": ["平静"] },
+    { "file": "xianqi.jpg", "label": "嫌弃", "moods": ["无语", "生气"] },
+    { "file": "diantou.jpg", "label": "点头", "moods": ["平静"] },
+    { "file": "zhaoshou.jpg", "label": "打招呼", "moods": ["开心"] },
+    { "file": "bunaifan.jpg", "label": "别烦我", "moods": ["生气"] },
+    { "file": "xin-ing.jpg", "label": "心动", "moods": ["害羞"] },
+    { "file": "xin-cui.jpg", "label": "手指抵唇", "moods": ["害羞"] },
+    { "file": "xin-peng.jpg", "label": "崩溃", "moods": ["惊讶"] },
+    { "file": "xin-tiao.jpg", "label": "挑衅", "moods": ["生气"] },
+    { "file": "xin-xiao.jpg", "label": "看好戏", "moods": ["开心"] },
+    { "file": "xin-daxiao.jpg", "label": "大笑", "moods": ["开心"] },
+    { "file": "xin-hei.jpg", "label": "暗笑", "moods": ["无语"] },
+    { "file": "xin-yao.jpg", "label": "馋", "moods": ["害羞"] }
+  ]
+}

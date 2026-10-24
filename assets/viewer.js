@@ -700,8 +700,8 @@
           }
           return base2;
         }
-        function digitToBasic(digit, flag) {
-          return digit + 22 + 75 * (digit < 26) - ((flag != 0) << 5);
+        function digitToBasic(digit, flag2) {
+          return digit + 22 + 75 * (digit < 26) - ((flag2 != 0) << 5);
         }
         function adapt(delta, numPoints, firstTime) {
           var k2 = 0;
@@ -9999,16 +9999,16 @@ void main(void)
       if (!this.bitmap && (this.process(), !this.bitmap))
         return false;
       if (super.upload(renderer, baseTexture, glTexture, this.bitmap), !this.preserveBitmap) {
-        let flag = true;
+        let flag2 = true;
         const glTextures = baseTexture._glTextures;
         for (const key in glTextures) {
           const otherTex = glTextures[key];
           if (otherTex !== glTexture && otherTex.dirtyId !== baseTexture.dirtyId) {
-            flag = false;
+            flag2 = false;
             break;
           }
         }
-        flag && (this.bitmap.close && this.bitmap.close(), this.bitmap = null);
+        flag2 && (this.bitmap.close && this.bitmap.close(), this.bitmap = null);
       }
       return true;
     }
@@ -31603,16 +31603,16 @@ void main(void)\r
         }
         _super.prototype.upload.call(this, renderer, baseTexture, glTexture, this.bitmap);
         if (!this.preserveBitmap) {
-          var flag = true;
+          var flag2 = true;
           var glTextures = baseTexture._glTextures;
           for (var key in glTextures) {
             var otherTex = glTextures[key];
             if (otherTex !== glTexture && otherTex.dirtyId !== baseTexture.dirtyId) {
-              flag = false;
+              flag2 = false;
               break;
             }
           }
-          if (flag) {
+          if (flag2) {
             if (this.bitmap.close) {
               this.bitmap.close();
             }
@@ -44321,6 +44321,146 @@ void main(void)\r
   var POKE_HEAD = ["\u5514\u3002", "\u522B\u6478\u3002", "\u5934\u53D1\u4E71\u4E86\u3002", "\u55EF\u2026\u2026", "\u4F60\u624B\u51C9\u3002"];
   var POKE_BODY = ["\u770B\u4EC0\u4E48\u770B\u3002", "\u6233\u4EC0\u4E48\u3002", "\u54FC\u3002", "\u522B\u95F9\u3002"];
   var POKE_LOW = ["\u5728\u5462\u3002", "\u6709\u4E8B\uFF1F", "\u600E\u4E48\u4E86\u3002"];
+  var flags = {};
+  try {
+    flags = JSON.parse(localStorage.getItem("dsh-l2d-flags") || "{}");
+  } catch {
+    flags = {};
+  }
+  function flag(k2) {
+    return flags[k2] === void 0 ? true : !!flags[k2];
+  }
+  function setFlag(k2, v2) {
+    flags[k2] = !!v2;
+    try {
+      localStorage.setItem("dsh-l2d-flags", JSON.stringify(flags));
+    } catch {
+    }
+  }
+  var LOCAL_OPTS = [
+    ["gaze", "\u773C\u775B\u8DDF\u7740\u9F20\u6807"],
+    ["poke", "\u70B9\u5979\u6709\u53CD\u5E94"],
+    ["motion", "\u81EA\u5DF1\u64AD\u52A8\u4F5C"],
+    ["sound", "\u51FA\u58F0"],
+    ["follow", "\u8DDF\u7740\u804A\u5929\u5FF5"]
+  ];
+  var SERVER_OPTS = [
+    ["proactive", "\u6CA1\u4EBA\u7406\u5C31\u81EA\u5DF1\u5F00\u53E3"],
+    ["choices", "\u7ED9\u9009\u9879\u8BA9\u4ED6\u6311"],
+    ["memory", "\u8BB0\u4F4F\u4E4B\u524D\u8BF4\u7684"]
+  ];
+  var MEME_MODES = ["off", "own", "both", "external"];
+  var MEME_LABELS = ["\u4E0D\u4F7F\u7528", "\u53EA\u4F7F\u7528\u81EA\u5E26", "\u5747\u5F00\u542F", "\u53EA\u7528 dsh-meme"];
+  var serverSettings = {};
+  function renderSettings() {
+    const box = $2("settings");
+    if (!box) return;
+    box.innerHTML = "";
+    const h1 = document.createElement("h3");
+    h1.textContent = "\u8FD9\u53F0\u673A\u5668\u4E0A";
+    box.appendChild(h1);
+    for (const [k2, label] of LOCAL_OPTS) {
+      const row = document.createElement("label");
+      row.className = "opt";
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = flag(k2);
+      cb.onchange = () => setFlag(k2, cb.checked);
+      row.appendChild(cb);
+      row.appendChild(document.createTextNode(label));
+      box.appendChild(row);
+    }
+    const h2 = document.createElement("h3");
+    h2.textContent = "\u5979\u90A3\u8FB9";
+    box.appendChild(h2);
+    for (const [k2, label] of SERVER_OPTS) {
+      const row = document.createElement("label");
+      row.className = "opt";
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = serverSettings[k2] !== false;
+      cb.onchange = () => {
+        serverSettings[k2] = cb.checked;
+        fetch(BASE + "/api/settings", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ settings: { [k2]: cb.checked } })
+        }).catch(() => {
+        });
+      };
+      row.appendChild(cb);
+      row.appendChild(document.createTextNode(label));
+      box.appendChild(row);
+    }
+    const h3 = document.createElement("h3");
+    h3.textContent = "\u8868\u60C5\u5305\uFF08\u6D4B\u8BD5\u529F\u80FD\uFF09";
+    box.appendChild(h3);
+    const wrap = document.createElement("div");
+    wrap.className = "opt-col";
+    const slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = "0";
+    slider.max = String(MEME_MODES.length - 1);
+    slider.step = "1";
+    const cur = Math.max(0, MEME_MODES.indexOf(serverSettings.memesMode || "off"));
+    slider.value = String(cur);
+    const lab = document.createElement("div");
+    lab.className = "opt-lab";
+    lab.textContent = MEME_LABELS[cur];
+    slider.oninput = () => {
+      lab.textContent = MEME_LABELS[Number(slider.value)];
+    };
+    slider.onchange = () => {
+      const mode = MEME_MODES[Number(slider.value)];
+      serverSettings.memesMode = mode;
+      fetch(BASE + "/api/settings", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ settings: { memesMode: mode } })
+      }).catch(() => {
+      });
+    };
+    const note = document.createElement("div");
+    note.className = "opt-note";
+    note.textContent = "\u81EA\u5E26\u90A3\u5957\u662F\u590F\u94C3\u7684 Q \u7248\u8D34\u7EB8\uFF0C\u4E8C\u5341\u5F20\uFF1Bdsh-meme \u90A3\u5957\u501F\u7528\u4F60\u672C\u673A\u5DF2\u7ECF\u88C5\u7684\u56FE\u5E93\u3002\u529F\u80FD\u8FD8\u5728\u8BD5\u9A8C\uFF0C\u53EF\u80FD\u4F1A\u8C03\u3002";
+    wrap.appendChild(slider);
+    wrap.appendChild(lab);
+    wrap.appendChild(note);
+    box.appendChild(wrap);
+  }
+  function loadSettings() {
+    fetch(BASE + "/api/settings").then((r2) => r2.json()).then((d2) => {
+      serverSettings = d2.settings || {};
+      renderSettings();
+    }).catch(() => renderSettings());
+  }
+  function showChoices(list) {
+    const box = $2("choices");
+    if (!box) return;
+    box.innerHTML = "";
+    if (!list || !list.length) {
+      box.classList.remove("show");
+      return;
+    }
+    for (const c2 of list) {
+      const b2 = document.createElement("button");
+      b2.textContent = c2;
+      b2.onclick = () => {
+        box.classList.remove("show");
+        fetch(BASE + "/api/chat", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ text: c2 })
+        }).then((r2) => r2.json()).then((d2) => {
+          if (d2.reply || d2.image) say(d2.reply || "", d2.mood, d2.image);
+          showChoices(d2.choices || []);
+        }).catch(() => {
+        });
+      };
+      box.appendChild(b2);
+    }
+    box.classList.add("show");
+  }
   var tone = { type: "triangle", base: 400, jit: 10, dur: 60, vol: 32, spd: 62 };
   var ac = null;
   function audioCtx() {
@@ -44337,7 +44477,7 @@ void main(void)\r
   }
   function blip(freq, durMs, type) {
     const a2 = audioCtx();
-    if (!a2 || !(tone.vol > 0)) return;
+    if (!a2 || !flag("sound") || !(tone.vol > 0)) return;
     const t0 = a2.currentTime;
     const osc = a2.createOscillator();
     const g2 = a2.createGain();
@@ -44485,7 +44625,7 @@ void main(void)\r
     await refresh(true);
     $2("drawer").classList.remove("show");
   }
-  function say(text, m2) {
+  function say(text, m2, image) {
     if (m2) applyMood(m2);
     const bubble = $2("bubble");
     let s2 = String(text == null ? "" : text).replace(/\s+/g, " ").trim();
@@ -44493,6 +44633,14 @@ void main(void)\r
     bubble.textContent = "";
     bubble.style.opacity = "1";
     clearTimeout(sayFade);
+    if (image) {
+      const img = document.createElement("img");
+      img.className = "bub-img";
+      img.src = String(image);
+      bubble.appendChild(img);
+    }
+    const holder = document.createElement("div");
+    bubble.appendChild(holder);
     const chars = Array.from(s2);
     let i2 = 0;
     const step = Math.max(20, Number(tone.spd) || 62);
@@ -44506,7 +44654,7 @@ void main(void)\r
         return;
       }
       const ch = chars[i2++];
-      bubble.textContent += ch;
+      holder.textContent += ch;
       mouth = 0.14;
       if (ch.trim() && PAUSE_CH.indexOf(ch) < 0) {
         const f2 = tone.base * (1 + (Math.random() - 0.5) * 2 * (Number(tone.jit) / 100));
@@ -44522,7 +44670,10 @@ void main(void)\r
   window.addEventListener("message", (e2) => {
     const d2 = e2.data || {};
     if (d2.type === "dsh-live2d/manage") $2("drawer").classList.toggle("show");
-    if (d2.type === "dsh-live2d/say") say(String(d2.text || ""), d2.mood);
+    if (d2.type === "dsh-live2d/say") {
+      say(String(d2.text || ""), d2.mood, d2.image);
+      if (Array.isArray(d2.choices)) showChoices(d2.choices);
+    }
     if (d2.type === "dsh-live2d/mood") applyMood(String(d2.mood || "\u5E73\u9759"));
     if (d2.type === "dsh-live2d/tone" && d2.voice && typeof d2.voice === "object") Object.assign(tone, d2.voice);
   });
@@ -44550,8 +44701,8 @@ void main(void)\r
       }
     }
     setP("ParamBreath", (Math.sin(t2 * 1.1) + 1) / 2);
-    const gx = Math.max(-1, Math.min(1, gazeX));
-    const gy = Math.max(-1, Math.min(1, gazeY));
+    const gx = flag("gaze") ? Math.max(-1, Math.min(1, gazeX)) : 0;
+    const gy = flag("gaze") ? Math.max(-1, Math.min(1, gazeY)) : 0;
     setP("ParamEyeBallX", gx * 0.9);
     setP("ParamEyeBallY", -gy * 0.65);
     if (!window.__holdHead) {
@@ -44567,7 +44718,7 @@ void main(void)\r
     core.update();
   });
   function maybeMotion() {
-    if (!model || !motionGroups.length) return;
+    if (!model || !motionGroups.length || !flag("motion")) return;
     const now = performance.now();
     if (now < nextMotionAt) return;
     nextMotionAt = now + 12e3 + Math.random() * 16e3;
@@ -44578,6 +44729,7 @@ void main(void)\r
     }
   }
   window.addEventListener("resize", () => setTimeout(fit, 60));
+  loadSettings();
   refresh(true).then(() => {
     if (state.models.length) setTimeout(idleTick, 2500);
     setInterval(() => {
@@ -44658,6 +44810,7 @@ void main(void)\r
   $2("stage").addEventListener("pointerdown", (e2) => {
     if (!core) return;
     audioCtx();
+    if (!flag("poke")) return;
     const now = Date.now();
     if (now - pokeAt < 800) return;
     pokeAt = now;

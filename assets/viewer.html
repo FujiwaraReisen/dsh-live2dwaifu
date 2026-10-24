@@ -4,50 +4,78 @@
 <meta charset="utf-8" />
 <title>Live2D</title>
 <style>
+
   html, body { margin: 0; height: 100%; background: transparent; overflow: hidden;
-    font: 12px/1.5 "Microsoft YaHei", system-ui, sans-serif; color: #d8dbe2; }
+    font: 12px/1.55 "Microsoft YaHei", system-ui, sans-serif; color: #dde2ea; }
   body.standalone { background: #14161a; }
   #stage { display: block; width: 100%; height: 100%; }
-  #bubble { position: absolute; left: 12px; right: 12px; bottom: 10px; min-height: 30px; box-sizing: border-box;
-    background: rgba(24,27,33,.94); border: 1px solid #3a4049; border-radius: 10px; padding: 7px 10px;
-    color: #dfe4ec; font-size: 13px; line-height: 1.45;
+  #bottom { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; flex-direction: column;
+    gap: 8px; pointer-events: none; }
+  #bottom > * { pointer-events: auto; }
+  #bubble { position: relative; min-height: 34px; box-sizing: border-box;
+    padding: 9px 12px; border-radius: 14px;
+    background: linear-gradient(180deg, rgba(32,37,45,.96), rgba(22,25,31,.97));
+    border: 1px solid rgba(255,255,255,.09); box-shadow: 0 10px 28px rgba(0,0,0,.5);
+    backdrop-filter: blur(8px); color: #e8edf4; font-size: 13px; line-height: 1.6;
     opacity: 0; transition: opacity .35s ease; cursor: grab; user-select: none;
-    max-height: 40%; overflow: hidden; touch-action: none; }
+    max-height: 42%; overflow: hidden; touch-action: none; }
   #bubble:active { cursor: grabbing; }
+  .bub-img { display: block; max-width: 70%; max-height: 88px; border-radius: 10px; margin-bottom: 7px; object-fit: contain; }
   #hint { position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
-    text-align: center; padding: 20px; color: #98a0ad; }
+    text-align: center; padding: 24px; color: #98a0ad; }
   #hint.show { display: flex; }
-  #drawer { position: absolute; inset: 0; background: rgba(18,20,24,.97); display: none;
-    flex-direction: column; padding: 12px; box-sizing: border-box; }
+  #drawer { position: absolute; inset: 0; display: none; flex-direction: column; padding: 12px; box-sizing: border-box;
+    background: linear-gradient(180deg, rgba(18,20,26,.97), rgba(14,16,20,.99)); backdrop-filter: blur(12px); }
   #drawer.show { display: flex; }
-  #drawer h2 { font-size: 12px; font-weight: 600; margin: 0 0 8px; color: #cfd4dd; letter-spacing: .5px; }
-  #list { flex: 1; overflow-y: auto; margin-bottom: 8px; }
-  .row { display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 8px; }
-  .row.cur { background: #2b3038; }
+  #drawer h2 { font-size: 11px; letter-spacing: .8px; font-weight: 600; margin: 0 0 8px; color: #8b94a3; }
+  #list { flex: 0 1 auto; max-height: 32%; overflow-y: auto; margin-bottom: 8px; }
+  .row { display: flex; align-items: center; gap: 6px; padding: 7px 8px; border-radius: 10px; transition: background .15s; }
+  .row:hover { background: rgba(255,255,255,.04); }
+  .row.cur { background: rgba(106,169,255,.14); border: 1px solid rgba(106,169,255,.3); }
   .row span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .row button { background: #2f343d; color: #cfd4dd; border: 1px solid #3c424c; border-radius: 6px;
-    padding: 2px 7px; cursor: pointer; font: inherit; }
-  .row button:hover { background: #3a4049; }
+  .row button { background: rgba(255,255,255,.07); color: #cfd4dd; border: 1px solid rgba(255,255,255,.1);
+    border-radius: 8px; padding: 3px 9px; cursor: pointer; font: inherit; transition: background .15s; }
+  .row button:hover { background: rgba(255,255,255,.14); }
   #exps { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-  #exps button { background: #2f343d; color: #cfd4dd; border: 1px solid #3c424c;
-    border-radius: 6px; padding: 3px 8px; cursor: pointer; font: inherit; }
-  #exps button.on { background: #3a5f8a; border-color: #4c7bb0; color: #eaf2ff; }
+  #exps button { background: rgba(255,255,255,.07); color: #cfd4dd; border: 1px solid rgba(255,255,255,.1);
+    border-radius: 999px; padding: 4px 10px; cursor: pointer; font: inherit; transition: all .15s; }
+  #exps button:hover { background: rgba(255,255,255,.14); }
+  #exps button.on { background: linear-gradient(180deg,#33587f,#27405f); border-color: #4c7bb0; color: #eaf2ff; }
   #exps .tipx { color: #6f7783; font-size: 11px; align-self: center; }
-  #actions { display: flex; gap: 6px; }
-  #actions button { flex: 1; background: #2f343d; color: #cfd4dd; border: 1px solid #3c424c;
-    border-radius: 8px; padding: 6px; cursor: pointer; font: inherit; }
-  #actions button:hover { background: #3a4049; }
-  #tip { color: #7f8794; font-size: 11px; margin: 6px 2px 0; }
+  #choices { display: none; flex-wrap: wrap; gap: 8px; }
+  #choices.show { display: flex; }
+  #choices button { background: linear-gradient(180deg, rgba(52,66,86,.97), rgba(36,48,64,.97));
+    border: 1px solid rgba(106,169,255,.45); border-radius: 999px; color: #e6f0fb; font: inherit; font-size: 12px;
+    padding: 6px 13px; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.35); transition: all .15s; }
+  #choices button:hover { filter: brightness(1.15); }
+  #choices button:active { transform: translateY(1px); }
+  #settings { flex: 0 1 auto; overflow-y: auto; margin-bottom: 8px; }
+  #settings h3 { font-size: 10px; letter-spacing: .8px; color: #6f7783; font-weight: 600; margin: 10px 0 5px; }
+  .opt { display: flex; align-items: center; gap: 8px; padding: 4px 2px; font-size: 12px; color: #c3c9d3; cursor: pointer; }
+  .opt input { accent-color: #6aa9ff; }
+  .opt-col { padding: 4px 2px 2px; }
+  .opt-col input[type=range] { width: 100%; accent-color: #6aa9ff; }
+  .opt-lab { font-size: 12px; color: #e2e8f1; margin-top: 2px; }
+  .opt-note { font-size: 10.5px; line-height: 1.65; color: #6f7783; margin-top: 5px; }
+  #actions { display: flex; gap: 8px; flex: none; }
+  #actions button { flex: 1; padding: 9px; border-radius: 10px; cursor: pointer; font: inherit;
+    background: rgba(255,255,255,.07); color: #dfe4ec; border: 1px solid rgba(255,255,255,.1); transition: background .15s; }
+  #actions button:hover { background: rgba(255,255,255,.14); }
+  #tip { color: #6f7783; font-size: 10.5px; margin: 8px 2px 0; line-height: 1.6; }
 </style>
 </head>
 <body>
 <canvas id="stage"></canvas>
-<div id="bubble"></div>
+<div id="bottom">
+  <div id="choices"></div>
+  <div id="bubble"></div>
+</div>
 <div id="hint"><div>还没有模型。<br />点下面的「导入模型」，选中你的 Live2D 文件夹（含 .model3.json 那一层）。</div></div>
 <div id="drawer">
   <h2>模型</h2>
   <div id="list"></div>
   <div id="exps"></div>
+  <div id="settings"></div>
   <div id="actions">
     <button id="import">导入模型</button>
     <button id="close">关掉</button>

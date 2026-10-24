@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<title>UI 预览 — dsh-live2dwaifu 1.0.0</title>
+<style>
+  :root { --line: rgba(255,255,255,.07); }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; background:radial-gradient(1000px 520px at 50% -10%, #1b1f27, #0f1116);
+    color:#dfe4ec; font:12px/1.5 "Microsoft YaHei",system-ui,sans-serif;
+    display:flex; align-items:center; justify-content:center; gap:30px; padding:26px; flex-wrap:wrap; }
+  .col { display:flex; flex-direction:column; gap:14px; }
+  .cap { font-size:11px; color:#6f7783; letter-spacing:.5px; }
+
+  /* ===== 卡片 ===== */
+  .card { position:relative; width:300px; height:430px; border-radius:16px; overflow:hidden;
+    border:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(36,41,50,.95) 0%,rgba(21,24,30,.97) 100%);
+    box-shadow:0 18px 48px rgba(0,0,0,.5); backdrop-filter:blur(10px); display:flex; flex-direction:column; }
+  .card.collapsed { width:150px; height:38px; }
+  .head { display:flex; align-items:center; gap:7px; padding:9px 11px; color:#a8b1bf; font-size:11px;
+    letter-spacing:.4px; border-bottom:1px solid var(--line); user-select:none; flex:none; cursor:move;
+    background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,0)); }
+  .dot { width:7px; height:7px; border-radius:50%; background:#6aa9ff; flex:none; box-shadow:0 0 0 3px rgba(106,169,255,.16); }
+  .name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#d7dde7; }
+  .btns { margin-left:auto; display:flex; gap:2px; flex:none; }
+  .btns span { width:22px; height:22px; border-radius:7px; display:flex; align-items:center; justify-content:center;
+    color:#7d858f; }
+  .btns span.on { color:#eef2f8; background:rgba(255,255,255,.09); }
+  .body { flex:1; position:relative; display:flex; flex-direction:column; justify-content:flex-end;
+    gap:8px; padding-bottom:12px; overflow:hidden;
+    background:radial-gradient(120% 70% at 50% 100%, #232935 0%, #171b22 70%); }
+  .body svg { position:absolute; left:50%; bottom:0; transform:translateX(-50%); width:74%; }
+  .bubble { position:relative; margin:0 12px; min-height:34px; padding:9px 12px; border-radius:14px;
+    background:linear-gradient(180deg,rgba(32,37,45,.96),rgba(22,25,31,.97));
+    border:1px solid rgba(255,255,255,.09); box-shadow:0 10px 28px rgba(0,0,0,.5);
+    color:#e8edf4; font-size:13px; line-height:1.6; }
+  .bubble .pic { width:72px; height:72px; border-radius:10px; margin-bottom:7px;
+    background:linear-gradient(160deg,#2f3946,#1d232c); border:1px solid rgba(255,255,255,.08);
+    display:flex; align-items:center; justify-content:center; color:#5d6675; font-size:9px; }
+  .choices { position:relative; margin:0 12px; display:flex; flex-wrap:wrap; gap:8px; }
+  .choices span { background:linear-gradient(180deg,rgba(52,66,86,.97),rgba(36,48,64,.97));
+    border:1px solid rgba(106,169,255,.45); border-radius:999px; color:#e6f0fb; font-size:12px;
+    padding:6px 13px; box-shadow:0 6px 18px rgba(0,0,0,.35); }
+  .say { display:flex; gap:7px; padding:8px 10px; border-top:1px solid var(--line); flex:none; }
+  .say .in { flex:1; min-width:0; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.09);
+    border-radius:10px; color:#e6ebf2; font-size:11.5px; padding:7px 10px; color:#6d7684; }
+  .say .in.focus { border-color:rgba(106,169,255,.55); background:rgba(255,255,255,.08); color:#e6ebf2; }
+  .say .send { background:linear-gradient(180deg,#33587f,#27405f); border:1px solid #3e6b9e; border-radius:10px;
+    color:#eaf2ff; padding:0 13px; font-size:11.5px; display:flex; align-items:center; }
+  .grip { position:absolute; right:1px; bottom:1px; width:18px; height:18px; opacity:.5;
+    background:repeating-linear-gradient(135deg,transparent 0 2px,rgba(255,255,255,.4) 2px 3px) no-repeat right bottom/10px 10px; }
+
+  /* ===== 抽屉 ===== */
+  .drawer { width:300px; height:600px; border-radius:16px; overflow:hidden; border:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(18,20,26,.97),rgba(14,16,20,.99));
+    box-shadow:0 18px 48px rgba(0,0,0,.5); backdrop-filter:blur(12px); padding:12px; display:flex; flex-direction:column; }
+  .drawer h2 { font-size:11px; letter-spacing:.8px; font-weight:600; margin:0 0 8px; color:#8b94a3; }
+  .row { display:flex; align-items:center; gap:6px; padding:7px 8px; border-radius:10px; }
+  .row.cur { background:rgba(106,169,255,.14); border:1px solid rgba(106,169,255,.3); }
+  .row span { flex:1; }
+  .row b { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:8px;
+    padding:3px 9px; font-weight:400; color:#cfd4dd; font-size:11px; }
+  .exps { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  .exps span { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); border-radius:999px;
+    padding:4px 10px; color:#cfd4dd; font-size:11px; }
+  .exps span.on { background:linear-gradient(180deg,#33587f,#27405f); border-color:#4c7bb0; color:#eaf2ff; }
+  .settings { flex:1; overflow:hidden; }
+  .settings h3 { font-size:10px; letter-spacing:.8px; color:#6f7783; font-weight:600; margin:10px 0 5px; }
+  .opt { display:flex; align-items:center; gap:8px; padding:3px 2px; color:#c3c9d3; }
+  .box { width:13px; height:13px; border-radius:4px; border:1px solid #4a5260; background:rgba(255,255,255,.05); }
+  .box.on { background:#6aa9ff; border-color:#6aa9ff; }
+  .slider { margin:6px 2px 2px; position:relative; height:4px; border-radius:2px; background:rgba(255,255,255,.12); }
+  .slider i { position:absolute; left:0; top:0; height:4px; width:66%; border-radius:2px; background:#6aa9ff; }
+  .slider b { position:absolute; top:-5px; left:66%; width:14px; height:14px; margin-left:-7px; border-radius:50%;
+    background:#eaf2ff; box-shadow:0 2px 6px rgba(0,0,0,.4); }
+  .lab { font-size:12px; color:#e2e8f1; margin-top:6px; }
+  .note { font-size:10.5px; line-height:1.65; color:#6f7783; margin-top:5px; }
+  .acts { display:flex; gap:8px; flex:none; margin-top:8px; }
+  .acts span { flex:1; text-align:center; padding:9px; border-radius:10px; background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.1); color:#dfe4ec; font-size:12px; }
+</style>
+</head>
+<body>
+
+<div class="col">
+  <div class="cap">展开（右下角）</div>
+  <div class="card">
+    <div class="head"><span class="dot"></span><span class="name">夏铃</span>
+      <span class="btns"><span class="on">⚙</span><span>◐</span><span>♪</span><span>✎</span><span>↻</span><span>⌄</span></span></div>
+    <div class="body">
+      <svg viewBox="0 0 200 300" aria-hidden="true">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#46505f" /><stop offset="1" stop-color="#252b34" /></linearGradient></defs>
+        <ellipse cx="100" cy="286" rx="80" ry="26" fill="#14171d" />
+        <path d="M100 44c26 0 42 19 42 44 0 17-7 30-14 37l5 32c22 9 40 25 46 49l6 46H15l6-46c6-24 24-40 46-49l5-32c-7-7-14-20-14-37 0-25 16-44 42-44z" fill="url(#g)" />
+        <path d="M58 88c0-25 18-44 42-44s42 19 42 44c0 6-1 11-3 15-6-16-22-26-39-26s-33 10-39 26c-2-4-3-9-3-15z" fill="#556072" />
+      </svg>
+      <div class="choices"><span>要面</span><span>要汤</span><span>都来点</span></div>
+      <div class="bubble">
+        <div class="pic">配图</div>
+        锅里还有，热的。
+      </div>
+    </div>
+    <div class="say"><div class="in focus">跟她说一句</div><div class="send">说</div></div>
+    <div class="grip"></div>
+  </div>
+
+  <div class="cap">收起</div>
+  <div class="card collapsed">
+    <div class="head"><span class="dot"></span><span class="name">夏铃</span>
+      <span class="btns"><span>⌃</span></span></div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="cap">⚙ 抽屉（模型 / 表情 / 设置 / 声音 / 人设）</div>
+  <div class="drawer">
+    <h2>模型</h2>
+    <div class="row cur"><span>夏铃</span><b>用这个</b><b>删</b></div>
+    <div class="row"><span>若妍</span><b>用这个</b><b>删</b></div>
+    <div class="exps"><span class="on">无</span><span>得意</span><span>害羞</span><span>无语</span><span>困</span></div>
+    <div class="settings">
+      <h3>这台机器上</h3>
+      <div class="opt"><span class="box on"></span>眼睛跟着鼠标</div>
+      <div class="opt"><span class="box on"></span>点她有反应</div>
+      <div class="opt"><span class="box on"></span>自己播动作</div>
+      <div class="opt"><span class="box on"></span>出声</div>
+      <div class="opt"><span class="box on"></span>跟着聊天念</div>
+      <h3>她那边</h3>
+      <div class="opt"><span class="box on"></span>没人理就自己开口</div>
+      <div class="opt"><span class="box on"></span>给选项让他挑</div>
+      <div class="opt"><span class="box on"></span>记住之前说的</div>
+      <h3>表情包（测试功能）</h3>
+      <div class="slider"><i></i><b></b></div>
+      <div class="lab">只使用自带</div>
+      <div class="note">自带那套是夏铃的 Q 版贴纸，二十张；dsh-meme 那套借用你本机已经装的图库。功能还在试验，可能会调。</div>
+    </div>
+    <div class="acts"><span>导入模型</span><span>关掉</span></div>
+  </div>
+</div>
+
+</body>
+</html>
