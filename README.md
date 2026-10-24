@@ -79,7 +79,7 @@ frame.contentWindow.postMessage({ type: 'dsh-live2d/manage' }, '*');
 ## 一些常见的小脾气
 
 **右下角什么都没有？**
-先重启一次 DSH；还不来就看 `cordis.patch.yml` 里有没有 `- id: dsh-live2dwaifu` 这一行。
+先重启一次 DSH。还不来，看 profile 的 `package.json`：`dsh.profile.bundles` 里得有 `dsh-live2dwaifu`，`dependencies` 里也得有。用 `dsh plugin add` 装的会自动写进去；手动解压到 `node_modules` 的不会——DSH 只加载列在 `bundles` 里的包，名字漏了就当没装，`/dsh-live2d/api/models` 也会 404。
 
 **导入了却不认得？**
 多半是文件夹选得太靠上或太靠下，`.model3.json` 就在里面那一层，选它隔壁那层。
