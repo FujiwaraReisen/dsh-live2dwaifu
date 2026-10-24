@@ -1,6 +1,6 @@
 {
   "name": "dsh-live2dwaifu",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "给 DSH 网页右下角请一个 Live2D 角色：会眨眼、会呼吸、说话时嘴动、心情变了眉毛跟着动。模型不用内置——谁装谁放自己的文件夹，文件留在这台机器上。",
   "type": "module",
   "main": "lib/index.js",
@@ -36,5 +36,13 @@
     "LICENSE"
   ],
   "license": "MIT",
-  "icon": "./icon.png"
+  "icon": "./icon.png",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FujiwaraReisen/dsh-live2dwaifu.git"
+  },
+  "homepage": "https://github.com/FujiwaraReisen/dsh-live2dwaifu#readme",
+  "bugs": {
+    "url": "https://github.com/FujiwaraReisen/dsh-live2dwaifu/issues"
+  }
 }
