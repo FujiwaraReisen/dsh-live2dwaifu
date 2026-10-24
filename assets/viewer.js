@@ -44321,6 +44321,37 @@ void main(void)\r
   var POKE_HEAD = ["\u5514\u3002", "\u522B\u6478\u3002", "\u5934\u53D1\u4E71\u4E86\u3002", "\u55EF\u2026\u2026", "\u4F60\u624B\u51C9\u3002"];
   var POKE_BODY = ["\u770B\u4EC0\u4E48\u770B\u3002", "\u6233\u4EC0\u4E48\u3002", "\u54FC\u3002", "\u522B\u95F9\u3002"];
   var POKE_LOW = ["\u5728\u5462\u3002", "\u6709\u4E8B\uFF1F", "\u600E\u4E48\u4E86\u3002"];
+  var tone = { type: "triangle", base: 400, jit: 10, dur: 60, vol: 32, spd: 62 };
+  var ac = null;
+  function audioCtx() {
+    if (!ac) {
+      try {
+        ac = new (window.AudioContext || window.webkitAudioContext)();
+      } catch {
+        ac = null;
+      }
+    }
+    if (ac && ac.state === "suspended") ac.resume().catch(() => {
+    });
+    return ac;
+  }
+  function blip(freq, durMs, type) {
+    const a2 = audioCtx();
+    if (!a2 || !(tone.vol > 0)) return;
+    const t0 = a2.currentTime;
+    const osc = a2.createOscillator();
+    const g2 = a2.createGain();
+    osc.type = type || tone.type;
+    osc.frequency.setValueAtTime(Math.max(40, freq), t0);
+    const peak = Math.max(1e-4, tone.vol / 100 * 0.32);
+    g2.gain.setValueAtTime(1e-4, t0);
+    g2.gain.exponentialRampToValueAtTime(peak, t0 + 4e-3);
+    g2.gain.exponentialRampToValueAtTime(1e-4, t0 + Math.max(0.02, durMs / 1e3));
+    osc.connect(g2).connect(a2.destination);
+    osc.start(t0);
+    osc.stop(t0 + Math.max(0.02, durMs / 1e3) + 0.03);
+  }
+  var PAUSE_CH = "\uFF0C\u3002\u3001\uFF01\uFF1F\uFF1B\uFF1A\u2026\u2014,.!?;:";
   var base = {};
   var BASE_IDS = ["ParamMouthForm", "ParamMouthOpenY", "ParamBrowLY", "ParamBrowRY", "ParamBrowLAngle", "ParamBrowRAngle", "ParamEyeLSmile", "ParamEyeRSmile", "ParamEyeLOpen", "ParamEyeROpen", "ParamEyeBallX", "ParamEyeBallY", "ParamAngleX", "ParamAngleY", "ParamAngleZ"];
   for (const id of BASE_IDS) base[id] = 0;
@@ -44367,6 +44398,7 @@ void main(void)\r
     app.stage.addChild(model);
     core = model.internalModel.coreModel;
     entryNow = entry;
+    if (entry.voice) Object.assign(tone, entry.voice);
     exps = entry.expressions || [];
     expParams = /* @__PURE__ */ new Map();
     expName = null;
@@ -44461,17 +44493,26 @@ void main(void)\r
     bubble.textContent = "";
     bubble.style.opacity = "1";
     clearTimeout(sayFade);
+    const chars = Array.from(s2);
     let i2 = 0;
+    const step = Math.max(20, Number(tone.spd) || 62);
     const t2 = setInterval(() => {
-      bubble.textContent = s2.slice(0, ++i2);
-      mouth = 0.14;
-      if (i2 >= s2.length) {
+      if (i2 >= chars.length) {
         clearInterval(t2);
+        if (chars.length) blip(tone.base * 0.82, tone.dur * 1.6, tone.type);
         sayFade = setTimeout(() => {
           bubble.style.opacity = "0";
-        }, Math.min(14e3, 4e3 + s2.length * 110));
+        }, Math.min(14e3, 4e3 + chars.length * 110));
+        return;
       }
-    }, 55);
+      const ch = chars[i2++];
+      bubble.textContent += ch;
+      mouth = 0.14;
+      if (ch.trim() && PAUSE_CH.indexOf(ch) < 0) {
+        const f2 = tone.base * (1 + (Math.random() - 0.5) * 2 * (Number(tone.jit) / 100));
+        blip(f2, tone.dur, tone.type);
+      }
+    }, step);
   }
   var idleIdx = 0;
   function idleTick() {
@@ -44483,6 +44524,7 @@ void main(void)\r
     if (d2.type === "dsh-live2d/manage") $2("drawer").classList.toggle("show");
     if (d2.type === "dsh-live2d/say") say(String(d2.text || ""), d2.mood);
     if (d2.type === "dsh-live2d/mood") applyMood(String(d2.mood || "\u5E73\u9759"));
+    if (d2.type === "dsh-live2d/tone" && d2.voice && typeof d2.voice === "object") Object.assign(tone, d2.voice);
   });
   window.__live2d = { say, mood: applyMood, refresh };
   $2("import").onclick = () => $2("files").click();
@@ -44615,6 +44657,7 @@ void main(void)\r
   var pokeIdx = 0;
   $2("stage").addEventListener("pointerdown", (e2) => {
     if (!core) return;
+    audioCtx();
     const now = Date.now();
     if (now - pokeAt < 800) return;
     pokeAt = now;

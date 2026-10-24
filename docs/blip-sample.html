@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<title>Live2D 电子音样本</title>
+<style>
+  :root { --bg:#12141a; --card:#171a20; --line:#2c313a; --txt:#dfe4ec; --dim:#7d858f; --acc:#6aa9ff; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; background:radial-gradient(1200px 600px at 50% -10%, #1b1f27, var(--bg));
+    color:var(--txt); font:13px/1.6 "Microsoft YaHei", system-ui, sans-serif;
+    display:flex; align-items:center; justify-content:center; gap:28px; padding:28px; flex-wrap:wrap; }
+  .card { width:320px; height:470px; background:var(--card); border:1px solid var(--line); border-radius:14px;
+    display:flex; flex-direction:column; overflow:hidden; box-shadow:0 18px 50px rgba(0,0,0,.45); }
+  .head { display:flex; align-items:center; gap:6px; padding:7px 10px; font-size:11px; letter-spacing:.5px;
+    border-bottom:1px solid var(--line); color:#c6ccd6; }
+  .dot { width:6px; height:6px; border-radius:50%; background:var(--acc); }
+  .head .sp { margin-left:auto; color:var(--dim); }
+  .body { flex:1; position:relative; display:flex; align-items:flex-end; justify-content:center;
+    background:linear-gradient(180deg, #1b1f27 0%, #14171d 100%); overflow:hidden; }
+  .body svg.sil { width:100%; height:100%; display:block; }
+  .bubble { min-height:34px; margin:0 10px 10px; padding:8px 11px; border-radius:10px;
+    background:rgba(24,27,33,.96); border:1px solid #3a4049; font-size:13px; line-height:1.5;
+    color:var(--txt); }
+  .bubble .ch { display:inline-block; animation:pop .12s ease-out; }
+  @keyframes pop { from { transform:translateY(3px) scale(.86); opacity:.2 } to { transform:none; opacity:1 } }
+  .bubble.idle::after { content:"按住麦克风说话，或者直接打字。"; color:var(--dim); }
+  .panel { width:330px; }
+  .panel h1 { font-size:15px; margin:0 0 4px; font-weight:600; }
+  .panel p.sub { margin:0 0 16px; color:var(--dim); font-size:12px; }
+  .group { border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:12px; background:#15181e; }
+  .group h2 { font-size:11px; letter-spacing:.6px; color:var(--dim); margin:0 0 10px; font-weight:600; }
+  .presets { display:flex; gap:8px; }
+  .presets button { flex:1; padding:8px 0; border-radius:9px; border:1px solid #3c424c; background:#232830;
+    color:#cfd4dd; cursor:pointer; font:inherit; font-size:12px; }
+  .presets button.on { border-color:var(--acc); background:#1e2c40; color:#eaf2ff; }
+  .row { display:flex; align-items:center; gap:10px; margin:9px 0; font-size:12px; color:#b9c0cb; }
+  .row span.lab { width:64px; flex:none; color:var(--dim); }
+  .row input[type=range] { flex:1; accent-color:var(--acc); }
+  .row b { width:44px; text-align:right; font-weight:500; color:#dfe4ec; font-variant-numeric:tabular-nums; }
+  .actions { display:flex; gap:8px; }
+  .actions button { flex:1; padding:10px 0; border-radius:10px; cursor:pointer; font:inherit; font-size:13px;
+    border:1px solid #3c424c; background:#232830; color:#dfe4ec; }
+  .actions button.primary { background:#27405f; border-color:#3e6b9e; color:#eaf2ff; }
+  .actions button:hover { filter:brightness(1.12); }
+  .typebox { display:flex; gap:8px; margin-top:10px; }
+  .typebox input { flex:1; padding:9px 11px; border-radius:9px; border:1px solid #3c424c; background:#181c22;
+    color:var(--txt); font:inherit; font-size:12px; }
+  .typebox button { padding:9px 14px; border-radius:9px; border:1px solid #3c424c; background:#232830;
+    color:#dfe4ec; cursor:pointer; font:inherit; font-size:12px; }
+  .tip { color:#6f7783; font-size:11px; margin-top:10px; line-height:1.6; }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="head"><span class="dot"></span><span>若妍</span><span class="sp">◐ ↻ ⌄</span></div>
+    <div class="body">
+      <svg class="sil" viewBox="0 0 200 300" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3d4552" />
+            <stop offset="1" stop-color="#20242b" />
+          </linearGradient>
+        </defs>
+        <ellipse cx="100" cy="282" rx="84" ry="30" fill="#1b1f26" />
+        <path d="M100 48c25 0 41 18 41 43 0 16-6 28-13 35l6 33c21 8 39 24 45 47l6 44H15l6-44c6-23 24-39 45-47l6-33c-7-7-13-19-13-35 0-25 16-43 41-43z" fill="url(#g)" />
+        <path d="M59 91c0-25 17-43 41-43s41 18 41 43c0 6-1 11-3 15-6-15-21-25-38-25s-32 10-38 25c-2-4-3-9-3-15z" fill="#4b5462" />
+      </svg>
+    </div>
+    <div class="bubble idle" id="bubble"></div>
+  </div>
+
+  <div class="panel">
+    <h1>电子音样本</h1>
+    <p class="sub">不读字，只发短促的“哔”。每出一个字响一下，音高随机抖一点，标点停一拍。</p>
+
+    <div class="group">
+      <h2>音色</h2>
+      <div class="presets" id="presets">
+        <button data-p="soft" class="on">柔和</button>
+        <button data-p="crisp">清脆</button>
+        <button data-p="hard">机械</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>参数</h2>
+      <div class="row"><span class="lab">基频</span><input id="base" type="range" min="180" max="720" value="430" /><b id="baseV">430</b></div>
+      <div class="row"><span class="lab">抖动</span><input id="jit" type="range" min="0" max="40" value="12" /><b id="jitV">12%</b></div>
+      <div class="row"><span class="lab">长度</span><input id="dur" type="range" min="20" max="110" value="46" /><b id="durV">46</b></div>
+      <div class="row"><span class="lab">音量</span><input id="vol" type="range" min="0" max="100" value="35" /><b id="volV">35</b></div>
+      <div class="row"><span class="lab">语速</span><input id="spd" type="range" min="28" max="110" value="62" /><b id="spdV">62</b></div>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="say">说一句</button>
+      <button id="mic">按住说话</button>
+    </div>
+    <div class="typebox">
+      <input id="typed" placeholder="手动打一句，回车" />
+      <button id="send">发</button>
+    </div>
+    <div class="tip">按住“按住说话”会假装在听，松手就把转写的话说出来——对应 dsh-ears 那条路。<br />声音由 Web Audio 现场合成，不加载任何音频文件。</div>
+  </div>
+
+<script>
+(function () {
+  var ac = null;
+  var bubble = document.getElementById('bubble');
+  var timer = null;
+  var line = 0;
+
+  var LINES = [
+    '你回来了。锅里还有。',
+    '猫又上桌了，我把它抱下来三次。',
+    '今天换到一小袋糖，给你留了半袋。',
+    '窗外没动静。风有点大。'
+  ];
+  var MIC = [
+    '我说，你今天是不是又没吃饭。',
+    '听见了。别站窗边，风硬。'
+  ];
+
+  var cfg = { type: 'triangle', base: 430, jit: 12, dur: 46, vol: 35, spd: 62, slant: 0 };
+
+  var PRESETS = {
+    soft:  { type: 'triangle', base: 400, jit: 10, dur: 60, vol: 32 },
+    crisp: { type: 'square',   base: 560, jit: 8,  dur: 34, vol: 22 },
+    hard:  { type: 'sawtooth', base: 300, jit: 22, dur: 44, vol: 20 }
+  };
+
+  function audio() {
+    if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === 'suspended') ac.resume();
+    return ac;
+  }
+
+  function blip(freq, durMs, type) {
+    var a = audio();
+    var t0 = a.currentTime;
+    var osc = a.createOscillator();
+    var gain = a.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    var peak = Math.max(0.0001, cfg.vol / 100);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(peak, t0 + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + durMs / 1000);
+    osc.connect(gain).connect(a.destination);
+    osc.start(t0);
+    osc.stop(t0 + durMs / 1000 + 0.03);
+  }
+
+  function isPause(ch) {
+    return '，。、！？；：…,.!?;:'.indexOf(ch) >= 0;
+  }
+
+  function speak(text) {
+    clearInterval(timer);
+    bubble.classList.remove('idle');
+    bubble.innerHTML = '';
+    var chars = Array.from(String(text));
+    var i = 0;
+    var jitter = cfg.jit / 100;
+    timer = setInterval(function () {
+      if (i >= chars.length) {
+        clearInterval(timer);
+        if (chars.length) {
+          blip(cfg.base * 0.82, cfg.dur * 1.6, cfg.type);
+        }
+        return;
+      }
+      var ch = chars[i++];
+      var el = document.createElement('span');
+      el.className = 'ch';
+      el.textContent = ch;
+      bubble.appendChild(el);
+      if (ch.trim() && !isPause(ch)) {
+        var f = cfg.base * (1 + (Math.random() - 0.5) * 2 * jitter);
+        blip(f, cfg.dur, cfg.type);
+      }
+    }, cfg.spd);
+  }
+
+  function bind(id, key, fmt) {
+    var el = document.getElementById(id);
+    var out = document.getElementById(id + 'V');
+    el.addEventListener('input', function () {
+      cfg[key] = Number(el.value);
+      out.textContent = fmt ? fmt(cfg[key]) : cfg[key];
+    });
+    out.textContent = fmt ? fmt(cfg[key]) : cfg[key];
+  }
+
+  bind('base', 'base');
+  bind('jit', 'jit', function (v) { return v + '%'; });
+  bind('dur', 'dur');
+  bind('vol', 'vol');
+  bind('spd', 'spd');
+
+  var presetBtns = [].slice.call(document.querySelectorAll('#presets button'));
+  presetBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      presetBtns.forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on');
+      var p = PRESETS[b.dataset.p];
+      Object.keys(p).forEach(function (k) { cfg[k] = p[k]; });
+      document.getElementById('base').value = cfg.base;
+      document.getElementById('baseV').textContent = cfg.base;
+      document.getElementById('jit').value = cfg.jit;
+      document.getElementById('jitV').textContent = cfg.jit + '%';
+      document.getElementById('dur').value = cfg.dur;
+      document.getElementById('durV').textContent = cfg.dur;
+      document.getElementById('vol').value = cfg.vol;
+      document.getElementById('volV').textContent = cfg.vol;
+      speak(LINES[line++ % LINES.length]);
+    });
+  });
+
+  document.getElementById('say').addEventListener('click', function () {
+    speak(LINES[line++ % LINES.length]);
+  });
+
+  var micBtn = document.getElementById('mic');
+  var micAt = 0;
+  micBtn.addEventListener('pointerdown', function () {
+    micAt = Date.now();
+    micBtn.textContent = '在听…';
+    bubble.classList.remove('idle');
+    bubble.textContent = '……';
+    audio();
+  });
+  micBtn.addEventListener('pointerup', function () {
+    micBtn.textContent = '按住说话';
+    var held = Date.now() - micAt;
+    var text = held < 350 ? '没听清，再说一遍。' : MIC[(Math.random() * MIC.length) | 0];
+    speak(text);
+  });
+
+  function sendTyped() {
+    var box = document.getElementById('typed');
+    var t = box.value.trim();
+    if (!t) return;
+    box.value = '';
+    speak(t);
+  }
+  document.getElementById('send').addEventListener('click', sendTyped);
+  document.getElementById('typed').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') sendTyped();
+  });
+
+  setInterval(function () {
+    if (document.hidden) return;
+    if (cfg.vol > 0 && !timer) return;
+  }, 1000);
+})();
+</script>
+</body>
+</html>
