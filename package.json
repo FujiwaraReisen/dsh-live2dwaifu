@@ -1,6 +1,6 @@
 {
   "name": "dsh-live2dwaifu",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "给 DSH 网页右下角请一个 Live2D 角色：会眨眼、会呼吸、视线跟着鼠标、点她有反应、说话时嘴动、心情变了眉毛跟着动。模型不用内置——谁装谁放自己的文件夹；支持自定义 .exp3.json 表情和 .motion3.json 动作，卡片能拖能缩，背景可换。",
   "type": "module",
   "main": "lib/index.js",
