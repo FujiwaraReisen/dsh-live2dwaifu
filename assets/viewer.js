@@ -44338,30 +44338,43 @@ void main(void)\r
     }
   }
   var LOCAL_OPTS = [
-    ["gaze", "\u773C\u775B\u8DDF\u7740\u9F20\u6807"],
-    ["poke", "\u70B9\u5979\u6709\u53CD\u5E94"],
-    ["motion", "\u81EA\u5DF1\u64AD\u52A8\u4F5C"],
-    ["sound", "\u51FA\u58F0"],
-    ["follow", "\u8DDF\u7740\u804A\u5929\u5FF5"]
+    ["gaze", "\u89C6\u7EBF\u8DDF\u968F\u9F20\u6807"],
+    ["poke", "\u70B9\u51FB\u89D2\u8272\u6709\u53CD\u5E94"],
+    ["motion", "\u81EA\u52A8\u64AD\u653E\u52A8\u4F5C"],
+    ["sound", "\u8BF4\u8BDD\u5E26\u7535\u5B50\u97F3"],
+    ["follow", "\u590D\u8FF0\u804A\u5929\u5185\u5BB9"]
   ];
   var SERVER_OPTS = [
-    ["proactive", "\u6CA1\u4EBA\u7406\u5C31\u81EA\u5DF1\u5F00\u53E3"],
-    ["choices", "\u7ED9\u9009\u9879\u8BA9\u4ED6\u6311"],
-    ["memory", "\u8BB0\u4F4F\u4E4B\u524D\u8BF4\u7684"]
+    ["proactive", "\u95F2\u7F6E\u65F6\u4E3B\u52A8\u8BF4\u8BDD"],
+    ["choices", "\u56DE\u590D\u9644\u5E26\u9009\u9879\u6309\u94AE"],
+    ["memory", "\u8BB0\u4F4F\u804A\u8FC7\u7684\u5185\u5BB9"]
   ];
+  var LOCAL_HINT = {
+    gaze: "\u89D2\u8272\u7684\u773C\u775B\u548C\u5934\u4F1A\u8DDF\u7740\u9F20\u6807\u79FB\u52A8",
+    poke: "\u70B9\u89D2\u8272\u7684\u4E0D\u540C\u90E8\u4F4D\u4F1A\u6709\u4E0D\u540C\u53CD\u5E94",
+    motion: "\u6A21\u578B\u5E26\u52A8\u4F5C\u6587\u4EF6\u65F6\uFF0C\u9694\u4E00\u4F1A\u513F\u81EA\u52A8\u64AD\u4E00\u4E2A",
+    sound: "\u8BF4\u8BDD\u65F6\u6BCF\u4E2A\u5B57\u53D1\u4E00\u58F0\u5F88\u77ED\u7684\u7535\u5B50\u97F3",
+    follow: "\u804A\u5929\u7A97\u53E3\u51FA\u73B0\u65B0\u56DE\u590D\u65F6\uFF0C\u7531\u89D2\u8272\u5FF5\u51FA\u6765"
+  };
+  var SERVER_HINT = {
+    proactive: "\u4E00\u6BB5\u65F6\u95F4\u6CA1\u4EBA\u8BF4\u8BDD\uFF0C\u89D2\u8272\u81EA\u5DF1\u5F00\u4E00\u53E5",
+    choices: "\u89D2\u8272\u89C9\u5F97\u9700\u8981\u9009\u62E9\u65F6\uFF0C\u6C14\u6CE1\u4E0A\u65B9\u51FA\u73B0\u53EF\u70B9\u7684\u6309\u94AE",
+    memory: "\u4FDD\u7559\u804A\u8FC7\u7684\u5185\u5BB9\uFF0C\u4E0B\u6B21\u63A5\u7740\u804A\uFF08\u5360\u66F4\u591A\u6A21\u578B\u989D\u5EA6\uFF09"
+  };
   var MEME_MODES = ["off", "own", "both", "external"];
-  var MEME_LABELS = ["\u4E0D\u4F7F\u7528", "\u53EA\u4F7F\u7528\u81EA\u5E26", "\u5747\u5F00\u542F", "\u53EA\u7528 dsh-meme"];
+  var MEME_LABELS = ["\u4E0D\u4F7F\u7528", "\u4EC5\u81EA\u5E26", "\u4E24\u8005\u90FD\u7528", "\u4EC5 dsh-meme"];
   var serverSettings = {};
   function renderSettings() {
     const box = $2("settings");
     if (!box) return;
     box.innerHTML = "";
     const h1 = document.createElement("h3");
-    h1.textContent = "\u8FD9\u53F0\u673A\u5668\u4E0A";
+    h1.textContent = "\u663E\u793A\u4E0E\u4EA4\u4E92\uFF08\u5B58\u672C\u673A\uFF09";
     box.appendChild(h1);
     for (const [k2, label] of LOCAL_OPTS) {
       const row = document.createElement("label");
       row.className = "opt";
+      row.title = LOCAL_HINT[k2] || "";
       const cb = document.createElement("input");
       cb.type = "checkbox";
       cb.checked = flag(k2);
@@ -44371,11 +44384,12 @@ void main(void)\r
       box.appendChild(row);
     }
     const h2 = document.createElement("h3");
-    h2.textContent = "\u5979\u90A3\u8FB9";
+    h2.textContent = "\u5BF9\u8BDD\u4E0E\u884C\u4E3A\uFF08\u5B58\u670D\u52A1\u7AEF\uFF09";
     box.appendChild(h2);
     for (const [k2, label] of SERVER_OPTS) {
       const row = document.createElement("label");
       row.className = "opt";
+      row.title = SERVER_HINT[k2] || "";
       const cb = document.createElement("input");
       cb.type = "checkbox";
       cb.checked = serverSettings[k2] !== false;
@@ -44422,7 +44436,7 @@ void main(void)\r
     };
     const note = document.createElement("div");
     note.className = "opt-note";
-    note.textContent = "\u81EA\u5E26\u90A3\u5957\u662F\u590F\u94C3\u7684 Q \u7248\u8D34\u7EB8\uFF0C\u4E8C\u5341\u5F20\uFF1Bdsh-meme \u90A3\u5957\u501F\u7528\u4F60\u672C\u673A\u5DF2\u7ECF\u88C5\u7684\u56FE\u5E93\u3002\u529F\u80FD\u8FD8\u5728\u8BD5\u9A8C\uFF0C\u53EF\u80FD\u4F1A\u8C03\u3002";
+    note.textContent = "\u9009\u8BF4\u8BDD\u65F6\u914D\u56FE\u7684\u6765\u6E90\uFF1A\u81EA\u5E26\u662F\u63D2\u4EF6\u5185\u7F6E\u7684\u8D34\u56FE\uFF1Bdsh-meme \u662F\u4F60\u5DF2\u7ECF\u88C5\u597D\u7684\u56FE\u5E93\u3002\u6B64\u529F\u80FD\u4ECD\u5728\u6D4B\u8BD5\uFF0C\u884C\u4E3A\u53EF\u80FD\u8C03\u6574\u3002";
     wrap.appendChild(slider);
     wrap.appendChild(lab);
     wrap.appendChild(note);
