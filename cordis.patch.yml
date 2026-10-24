@@ -1,0 +1,9 @@
+# dsh-live2dwaifu —— DSH bundle patch
+# 把 Live2D 挂件插进 Web profile 的配置树。
+#
+# id 必须与包名一致（插件商城的预检按它比对 entry ID），
+# 且 "id: 值" 那一行后面不能跟行尾注释。
+
+- insert:
+    - id: dsh-live2dwaifu
+      name: 'dsh-live2dwaifu'

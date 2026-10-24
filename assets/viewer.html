@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<title>Live2D</title>
+<style>
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden;
+    font: 12px/1.5 "Microsoft YaHei", system-ui, sans-serif; color: #d8dbe2; }
+  body.standalone { background: #14161a; }
+  #stage { display: block; width: 100%; height: 100%; }
+  #bubble { position: absolute; left: 12px; right: 12px; bottom: 10px; min-height: 30px; box-sizing: border-box;
+    background: rgba(24,27,33,.94); border: 1px solid #3a4049; border-radius: 10px; padding: 7px 10px;
+    color: #dfe4ec; font-size: 13px; line-height: 1.45; }
+  #hint { position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+    text-align: center; padding: 20px; color: #98a0ad; }
+  #hint.show { display: flex; }
+  #drawer { position: absolute; inset: 0; background: rgba(18,20,24,.97); display: none;
+    flex-direction: column; padding: 12px; box-sizing: border-box; }
+  #drawer.show { display: flex; }
+  #drawer h2 { font-size: 12px; font-weight: 600; margin: 0 0 8px; color: #cfd4dd; letter-spacing: .5px; }
+  #list { flex: 1; overflow-y: auto; margin-bottom: 8px; }
+  .row { display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 8px; }
+  .row.cur { background: #2b3038; }
+  .row span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row button { background: #2f343d; color: #cfd4dd; border: 1px solid #3c424c; border-radius: 6px;
+    padding: 2px 7px; cursor: pointer; font: inherit; }
+  .row button:hover { background: #3a4049; }
+  #actions { display: flex; gap: 6px; }
+  #actions button { flex: 1; background: #2f343d; color: #cfd4dd; border: 1px solid #3c424c;
+    border-radius: 8px; padding: 6px; cursor: pointer; font: inherit; }
+  #actions button:hover { background: #3a4049; }
+  #tip { color: #7f8794; font-size: 11px; margin: 6px 2px 0; }
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+<div id="bubble"></div>
+<div id="hint"><div>还没有模型。<br />点下面的「导入模型」，选中你的 Live2D 文件夹（含 .model3.json 那一层）。</div></div>
+<div id="drawer">
+  <h2>模型</h2>
+  <div id="list"></div>
+  <div id="actions">
+    <button id="import">导入模型</button>
+    <button id="close">关掉</button>
+  </div>
+  <div id="tip">选整个文件夹，浏览器会自己把里面所有文件读进来。</div>
+  <input id="files" type="file" webkitdirectory multiple style="display:none" />
+</div>
+<script>
+  if (!location.search.includes('embed')) document.body.classList.add('standalone');
+</script>
+<script src="/dsh-live2d/assets/live2dcubismcore.min.js"></script>
+<script src="/dsh-live2d/assets/viewer.js"></script>
+</body>
+</html>
