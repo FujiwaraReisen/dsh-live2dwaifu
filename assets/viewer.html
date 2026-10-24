@@ -25,6 +25,11 @@
   .row button { background: #2f343d; color: #cfd4dd; border: 1px solid #3c424c; border-radius: 6px;
     padding: 2px 7px; cursor: pointer; font: inherit; }
   .row button:hover { background: #3a4049; }
+  #exps { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  #exps button { background: #2f343d; color: #cfd4dd; border: 1px solid #3c424c;
+    border-radius: 6px; padding: 3px 8px; cursor: pointer; font: inherit; }
+  #exps button.on { background: #3a5f8a; border-color: #4c7bb0; color: #eaf2ff; }
+  #exps .tipx { color: #6f7783; font-size: 11px; align-self: center; }
   #actions { display: flex; gap: 6px; }
   #actions button { flex: 1; background: #2f343d; color: #cfd4dd; border: 1px solid #3c424c;
     border-radius: 8px; padding: 6px; cursor: pointer; font: inherit; }
@@ -39,6 +44,7 @@
 <div id="drawer">
   <h2>模型</h2>
   <div id="list"></div>
+  <div id="exps"></div>
   <div id="actions">
     <button id="import">导入模型</button>
     <button id="close">关掉</button>

@@ -11238,9 +11238,9 @@ void main(void)
         const attribute = attributes[j2], buffer = buffers[attribute.buffer], glBuffer = buffer._glBuffers[CONTEXT_UID];
         if (program.attributeData[j2]) {
           lastBuffer !== glBuffer && (bufferSystem.bind(buffer), lastBuffer = glBuffer);
-          const location = program.attributeData[j2].location;
-          if (gl.enableVertexAttribArray(location), gl.vertexAttribPointer(
-            location,
+          const location2 = program.attributeData[j2].location;
+          if (gl.enableVertexAttribArray(location2), gl.vertexAttribPointer(
+            location2,
             attribute.size,
             attribute.type || gl.FLOAT,
             attribute.normalized,
@@ -11248,7 +11248,7 @@ void main(void)
             attribute.start
           ), attribute.instance)
             if (this.hasInstance)
-              gl.vertexAttribDivisor(location, attribute.divisor);
+              gl.vertexAttribDivisor(location2, attribute.divisor);
             else
               throw new Error("geometry error, GPU Instancing is not supported on this device");
         }
@@ -12957,14 +12957,14 @@ void main(void)
      * @param texture - Texture to bind
      * @param [location=0] - Location to bind at
      */
-    bind(texture, location = 0) {
+    bind(texture, location2 = 0) {
       const { gl } = this;
       if (texture = texture?.castToBaseTexture(), texture?.valid && !texture.parentTextureArray) {
         texture.touched = this.renderer.textureGC.count;
         const glTexture = texture._glTextures[this.CONTEXT_UID] || this.initTexture(texture);
-        this.boundTextures[location] !== texture && (this.currentLocation !== location && (this.currentLocation = location, gl.activeTexture(gl.TEXTURE0 + location)), gl.bindTexture(texture.target, glTexture.texture)), glTexture.dirtyId !== texture.dirtyId ? (this.currentLocation !== location && (this.currentLocation = location, gl.activeTexture(gl.TEXTURE0 + location)), this.updateTexture(texture)) : glTexture.dirtyStyleId !== texture.dirtyStyleId && this.updateTextureStyle(texture), this.boundTextures[location] = texture;
+        this.boundTextures[location2] !== texture && (this.currentLocation !== location2 && (this.currentLocation = location2, gl.activeTexture(gl.TEXTURE0 + location2)), gl.bindTexture(texture.target, glTexture.texture)), glTexture.dirtyId !== texture.dirtyId ? (this.currentLocation !== location2 && (this.currentLocation = location2, gl.activeTexture(gl.TEXTURE0 + location2)), this.updateTexture(texture)) : glTexture.dirtyStyleId !== texture.dirtyStyleId && this.updateTextureStyle(texture), this.boundTextures[location2] = texture;
       } else
-        this.currentLocation !== location && (this.currentLocation = location, gl.activeTexture(gl.TEXTURE0 + location)), gl.bindTexture(gl.TEXTURE_2D, this.emptyTextures[gl.TEXTURE_2D].texture), this.boundTextures[location] = null;
+        this.currentLocation !== location2 && (this.currentLocation = location2, gl.activeTexture(gl.TEXTURE0 + location2)), gl.bindTexture(gl.TEXTURE_2D, this.emptyTextures[gl.TEXTURE_2D].texture), this.boundTextures[location2] = null;
     }
     /** Resets texture location and bound textures Actual `bind(null, i)` calls will be performed at next `unbind()` call */
     reset() {
@@ -18040,7 +18040,7 @@ void main()
       }
       return propagationPath.reverse(), propagationPath;
     }
-    hitTestMoveRecursive(currentTarget, eventMode, location, testFn, pruneFn, ignore = false) {
+    hitTestMoveRecursive(currentTarget, eventMode, location2, testFn, pruneFn, ignore = false) {
       let shouldReturn = false;
       if (this._interactivePrune(currentTarget))
         return null;
@@ -18050,10 +18050,10 @@ void main()
           const child = children[i2], nestedHit = this.hitTestMoveRecursive(
             child,
             this._isInteractive(eventMode) ? eventMode : child.eventMode,
-            location,
+            location2,
             testFn,
             pruneFn,
-            ignore || pruneFn(currentTarget, location)
+            ignore || pruneFn(currentTarget, location2)
           );
           if (nestedHit) {
             if (nestedHit.length > 0 && !nestedHit[nestedHit.length - 1].parent)
@@ -18064,7 +18064,7 @@ void main()
         }
       }
       const isInteractiveMode = this._isInteractive(eventMode), isInteractiveTarget = currentTarget.isInteractive();
-      return isInteractiveMode && isInteractiveTarget && this._allInteractiveElements.push(currentTarget), ignore || this._hitElements.length > 0 ? null : shouldReturn ? this._hitElements : isInteractiveMode && !pruneFn(currentTarget, location) && testFn(currentTarget, location) ? isInteractiveTarget ? [currentTarget] : [] : null;
+      return isInteractiveMode && isInteractiveTarget && this._allInteractiveElements.push(currentTarget), ignore || this._hitElements.length > 0 ? null : shouldReturn ? this._hitElements : isInteractiveMode && !pruneFn(currentTarget, location2) && testFn(currentTarget, location2) ? isInteractiveTarget ? [currentTarget] : [] : null;
     }
     /**
      * Recursive implementation for {@link PIXI.EventBoundary.hitTest hitTest}.
@@ -18080,8 +18080,8 @@ void main()
      *  is the target itself and the last is {@link PIXI.EventBoundary.rootTarget rootTarget}. This is the opposite
      *  order w.r.t. the propagation path. If no hit testing target is found, null is returned.
      */
-    hitTestRecursive(currentTarget, eventMode, location, testFn, pruneFn) {
-      if (this._interactivePrune(currentTarget) || pruneFn(currentTarget, location))
+    hitTestRecursive(currentTarget, eventMode, location2, testFn, pruneFn) {
+      if (this._interactivePrune(currentTarget) || pruneFn(currentTarget, location2))
         return null;
       if ((currentTarget.eventMode === "dynamic" || eventMode === "dynamic") && (EventsTicker.pauseUpdate = false), currentTarget.interactiveChildren && currentTarget.children) {
         const children = currentTarget.children;
@@ -18089,7 +18089,7 @@ void main()
           const child = children[i2], nestedHit = this.hitTestRecursive(
             child,
             this._isInteractive(eventMode) ? eventMode : child.eventMode,
-            location,
+            location2,
             testFn,
             pruneFn
           );
@@ -18102,7 +18102,7 @@ void main()
         }
       }
       const isInteractiveMode = this._isInteractive(eventMode), isInteractiveTarget = currentTarget.isInteractive();
-      return isInteractiveMode && testFn(currentTarget, location) ? isInteractiveTarget ? [currentTarget] : [] : null;
+      return isInteractiveMode && testFn(currentTarget, location2) ? isInteractiveTarget ? [currentTarget] : [] : null;
     }
     _isInteractive(int) {
       return int === "static" || int === "dynamic";
@@ -18118,12 +18118,12 @@ void main()
      * @param displayObject
      * @param location
      */
-    hitPruneFn(displayObject, location) {
-      if (displayObject.hitArea && (displayObject.worldTransform.applyInverse(location, tempLocalMapping), !displayObject.hitArea.contains(tempLocalMapping.x, tempLocalMapping.y)))
+    hitPruneFn(displayObject, location2) {
+      if (displayObject.hitArea && (displayObject.worldTransform.applyInverse(location2, tempLocalMapping), !displayObject.hitArea.contains(tempLocalMapping.x, tempLocalMapping.y)))
         return true;
       if (displayObject._mask) {
         const maskObject = displayObject._mask.isMaskData ? displayObject._mask.maskObject : displayObject._mask;
-        if (maskObject && !maskObject.containsPoint?.(location))
+        if (maskObject && !maskObject.containsPoint?.(location2))
           return true;
       }
       return false;
@@ -18134,8 +18134,8 @@ void main()
      * @param location
      * @returns - Whether `displayObject` passes hit testing for `location`.
      */
-    hitTestFn(displayObject, location) {
-      return displayObject.eventMode === "passive" ? false : displayObject.hitArea ? true : displayObject.containsPoint ? displayObject.containsPoint(location) : false;
+    hitTestFn(displayObject, location2) {
+      return displayObject.eventMode === "passive" ? false : displayObject.hitArea ? true : displayObject.containsPoint ? displayObject.containsPoint(location2) : false;
     }
     /**
      * Notify all the listeners to the event's `currentTarget`.
@@ -34329,12 +34329,12 @@ void main(void)\r
               bufferSystem.bind(buffer);
               lastBuffer = glBuffer;
             }
-            var location = program.attributeData[j2].location;
-            gl.enableVertexAttribArray(location);
-            gl.vertexAttribPointer(location, attribute.size, attribute.type || gl.FLOAT, attribute.normalized, attribute.stride, attribute.start);
+            var location2 = program.attributeData[j2].location;
+            gl.enableVertexAttribArray(location2);
+            gl.vertexAttribPointer(location2, attribute.size, attribute.type || gl.FLOAT, attribute.normalized, attribute.stride, attribute.start);
             if (attribute.instance) {
               if (this.hasInstance) {
-                gl.vertexAttribDivisor(location, 1);
+                gl.vertexAttribDivisor(location2, 1);
               } else {
                 throw new Error("geometry error, GPU Instancing is not supported on this device");
               }
@@ -36544,39 +36544,39 @@ void main(void)\r
           this.bind(null, i2);
         }
       };
-      TextureSystem3.prototype.bind = function(texture, location) {
-        if (location === void 0) {
-          location = 0;
+      TextureSystem3.prototype.bind = function(texture, location2) {
+        if (location2 === void 0) {
+          location2 = 0;
         }
         var gl = this.gl;
         texture = texture === null || texture === void 0 ? void 0 : texture.castToBaseTexture();
         if (texture && texture.valid && !texture.parentTextureArray) {
           texture.touched = this.renderer.textureGC.count;
           var glTexture = texture._glTextures[this.CONTEXT_UID] || this.initTexture(texture);
-          if (this.boundTextures[location] !== texture) {
-            if (this.currentLocation !== location) {
-              this.currentLocation = location;
-              gl.activeTexture(gl.TEXTURE0 + location);
+          if (this.boundTextures[location2] !== texture) {
+            if (this.currentLocation !== location2) {
+              this.currentLocation = location2;
+              gl.activeTexture(gl.TEXTURE0 + location2);
             }
             gl.bindTexture(texture.target, glTexture.texture);
           }
           if (glTexture.dirtyId !== texture.dirtyId) {
-            if (this.currentLocation !== location) {
-              this.currentLocation = location;
-              gl.activeTexture(gl.TEXTURE0 + location);
+            if (this.currentLocation !== location2) {
+              this.currentLocation = location2;
+              gl.activeTexture(gl.TEXTURE0 + location2);
             }
             this.updateTexture(texture);
           } else if (glTexture.dirtyStyleId !== texture.dirtyStyleId) {
             this.updateTextureStyle(texture);
           }
-          this.boundTextures[location] = texture;
+          this.boundTextures[location2] = texture;
         } else {
-          if (this.currentLocation !== location) {
-            this.currentLocation = location;
-            gl.activeTexture(gl.TEXTURE0 + location);
+          if (this.currentLocation !== location2) {
+            this.currentLocation = location2;
+            gl.activeTexture(gl.TEXTURE0 + location2);
           }
           gl.bindTexture(gl.TEXTURE_2D, this.emptyTextures[gl.TEXTURE_2D].texture);
-          this.boundTextures[location] = null;
+          this.boundTextures[location2] = null;
         }
       };
       TextureSystem3.prototype.reset = function() {
@@ -44308,6 +44308,10 @@ void main(void)\r
   var mood = "\u5E73\u9759";
   var mouth = 0;
   var state = { models: [], selected: null };
+  var entryNow = null;
+  var exps = [];
+  var expParams = /* @__PURE__ */ new Map();
+  var expName = null;
   var base = {};
   var BASE_IDS = ["ParamMouthForm", "ParamMouthOpenY", "ParamBrowLY", "ParamBrowRY", "ParamBrowLAngle", "ParamBrowRAngle", "ParamEyeLSmile", "ParamEyeRSmile", "ParamEyeLOpen", "ParamEyeROpen", "ParamEyeBallX", "ParamEyeBallY", "ParamAngleX", "ParamAngleY", "ParamAngleZ"];
   for (const id of BASE_IDS) base[id] = 0;
@@ -44322,8 +44326,6 @@ void main(void)\r
   }
   function applyMood(name) {
     mood = name;
-    for (const id of BASE_IDS) setP(id, base[id]);
-    for (const [id, v2] of Object.entries(PRESETS[name] || {})) setP(id, v2);
   }
   function fit() {
     if (!model) return;
@@ -44355,6 +44357,11 @@ void main(void)\r
     model = await Live2DModel.from(url3, { autoInteract: false });
     app.stage.addChild(model);
     core = model.internalModel.coreModel;
+    entryNow = entry;
+    exps = entry.expressions || [];
+    expParams = /* @__PURE__ */ new Map();
+    expName = null;
+    renderExps();
     fit();
     applyMood("\u5E73\u9759");
     $2("hint").classList.remove("show");
@@ -44456,13 +44463,31 @@ void main(void)\r
   $2("import").onclick = () => $2("files").click();
   $2("close").onclick = () => $2("drawer").classList.remove("show");
   $2("files").onchange = (e2) => importFolder(e2.target.files);
+  function moodValue(id) {
+    const p2 = PRESETS[mood] || {};
+    if (id in p2) return p2[id];
+    return base[id] ?? 0;
+  }
   app.ticker.add(() => {
     if (!core) return;
     const t2 = app.ticker.lastTime / 1e3;
+    for (const id of BASE_IDS) setP(id, base[id]);
+    for (const [id, v2] of Object.entries(PRESETS[mood] || {})) setP(id, v2);
+    if (expParams.size) {
+      for (const [id, e2] of expParams) {
+        const cur = moodValue(id);
+        let v2 = e2.value;
+        if (e2.blend === "Add") v2 = cur + e2.value;
+        else if (e2.blend === "Multiply") v2 = cur * e2.value;
+        setP(id, v2);
+      }
+    }
     setP("ParamBreath", (Math.sin(t2 * 1.1) + 1) / 2);
-    setP("ParamAngleX", Math.sin(t2 * 0.43) * 4);
-    setP("ParamAngleY", Math.sin(t2 * 0.31 + 1) * 3);
-    setP("ParamBodyAngleX", Math.sin(t2 * 0.29) * 2);
+    if (!window.__holdHead) {
+      setP("ParamAngleX", Math.sin(t2 * 0.43) * 4);
+      setP("ParamAngleY", Math.sin(t2 * 0.31 + 1) * 3);
+      setP("ParamBodyAngleX", Math.sin(t2 * 0.29) * 2);
+    }
     if (mouth > 0) {
       mouth = Math.max(0, mouth - app.ticker.deltaMS / 1e3);
       setP("ParamMouthOpenY", (Math.sin(t2 * 18) * 0.5 + 0.5) * 0.26 + 0.02);
@@ -44475,6 +44500,67 @@ void main(void)\r
     setInterval(() => {
       if (state.models.length && !$2("drawer").classList.contains("show")) idleTick();
     }, 9e3);
+  });
+  function renderExps() {
+    const box = $2("exps");
+    if (!box) return;
+    box.innerHTML = "";
+    const none = document.createElement("button");
+    none.textContent = "\u65E0";
+    none.className = expName === null ? "on" : "";
+    none.onclick = () => {
+      expParams = /* @__PURE__ */ new Map();
+      expName = null;
+      renderExps();
+    };
+    box.appendChild(none);
+    if (!exps.length) {
+      const tip = document.createElement("span");
+      tip.className = "tipx";
+      tip.textContent = "\u8FD9\u4E2A\u6A21\u578B\u6CA1\u5E26 .exp3.json";
+      box.appendChild(tip);
+      return;
+    }
+    for (const rel of exps) {
+      const b2 = document.createElement("button");
+      const label = rel.split("/").pop().replace(/\.exp3\.json$/i, "");
+      b2.textContent = label;
+      b2.className = expName === rel ? "on" : "";
+      b2.onclick = () => activateExp(rel);
+      box.appendChild(b2);
+    }
+  }
+  async function activateExp(rel) {
+    if (!entryNow) return;
+    expName = rel;
+    expParams = /* @__PURE__ */ new Map();
+    try {
+      const url3 = BASE + "/model/" + encodeURIComponent(entryNow.id) + "/" + encPath(rel);
+      const data = await (await fetch(url3)).json();
+      for (const p2 of data.Parameters || []) {
+        expParams.set(p2.Id, { value: Number(p2.Value) || 0, blend: p2.Blend || "Add" });
+      }
+    } catch {
+    }
+    renderExps();
+  }
+  var BG = { none: "transparent", dark: "#171a20", light: "#eef1f5", paper: "#f4efe6" };
+  function applyBg(name) {
+    const c2 = BG[name] || "transparent";
+    document.body.style.background = c2;
+    document.body.dataset.bg = name;
+    const b2 = document.getElementById("bubble");
+    if (b2) {
+      b2.style.background = name === "light" || name === "paper" ? "rgba(255,255,255,.92)" : "rgba(24,27,33,.94)";
+      b2.style.color = name === "light" || name === "paper" ? "#22262c" : "#dfe4ec";
+      b2.style.borderColor = name === "light" || name === "paper" ? "#cfd5dd" : "#3a4049";
+    }
+  }
+  var bgParam = new URLSearchParams(location.search).get("bg") || "none";
+  applyBg(bgParam);
+  window.addEventListener("message", (e2) => {
+    const d2 = e2.data || {};
+    if (d2.type === "dsh-live2d/bg") applyBg(String(d2.bg || "none"));
   });
 })();
 /*! Bundled license information:

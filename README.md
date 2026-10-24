@@ -13,6 +13,8 @@
 | 展开 | 一张小卡片，上半身，底下一条气泡装台词 |
 | 收起 | 缩成一条，只剩名字和一个 ⌃ |
 
+右下角有个小三角，拖它就能改卡片大小；标题栏的 **◐** 一键换背景（透明 / 深色 / 浅色 / 纸质）。窗口大小、背景、开合状态都记在本机，下次还是这样。
+
 ## 三十秒上手
 
 ```bash
@@ -33,6 +35,8 @@ dsh plugin --profile desktop add dsh-live2dwaifu
 
 **能吃什么**：Cubism 3 / 4（`.model3.json` + `.moc3`）。
 **吃不了什么**：Cubism 2 的老格式（`.model.json` + `.moc`）。
+
+**自定义表情**：模型文件夹里带 `.exp3.json` 的，导入后在 ⚙ 面板里会列出来，点一下就叠上去（Add / Multiply / Overwrite 三种混合照原样执行）。Cubism 4 的 `.exp3.json` 直接从原画软件导出即可。
 
 **没有动作文件也能活**：眨眼靠 EyeBlink 参数组，嘴动靠 `ParamMouthOpenY`，头发晃动是 `physics3.json` 自带的物理；表情是本插件拿标准参数（`ParamEyeLSmile`、`ParamMouthForm`、`ParamBrow*`、`ParamAngle*`）现摆的，一共七种：平静、开心、委屈、生气、害羞、无语、困。
 
@@ -88,9 +92,9 @@ frame.contentWindow.postMessage({ type: 'dsh-live2d/manage' }, '*');
 
 ## 已知限制
 
-- 只支持 Cubism 3 / 4
+- 只支持 Cubism 3 / 4（表情只认 `.exp3.json`，不认 `.motion3.json` 里的表情轨）
 - 面板是浮层（`shell.overlay`），不是聊天区分栏；会盖住右下角，能收起
-- 七种表情，暂不支持自定义表情文件（`.exp3.json`）
+- 内置七种情绪；自定义表情靠模型自带的 `.exp3.json`，一次只能叠一个
 - 内置的 Cubism Core 是 Live2D Inc. 的 Redistributable Code，随包分发，使用受其 EULA 约束
 
 ---
