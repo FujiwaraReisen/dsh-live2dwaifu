@@ -340,6 +340,12 @@ curl -X POST http://127.0.0.1:<端口>/dsh-live2d/api/push \
 
 ---
 
+## 反馈
+
+遇到问题、想要新功能、觉得哪句话还是像 AI，都可以写信到 **FujiwaraReisen@outlook.com**。
+
+也可以直接去 [GitHub Issues](https://github.com/FujiwaraReisen/dsh-live2dwaifu/issues) 提，附上模型的来源和出问题的样子更容易定位。
+
 ## 致谢
 
 - Live2D Cubism Core © Live2D Inc.
