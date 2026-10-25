@@ -44417,10 +44417,19 @@ void main(void)\r
     gapSlider.min = "0";
     gapSlider.max = String(GAP_VALUES.length - 1);
     gapSlider.step = "1";
-    const curGap = Math.max(
-      0,
-      GAP_VALUES.indexOf(Number(serverSettings.proactiveInterval ?? 30))
-    );
+    const curGap = (() => {
+      const v2 = Number(serverSettings.proactiveInterval ?? 30);
+      let best = 0;
+      let bestDiff = Infinity;
+      GAP_VALUES.forEach((g2, i2) => {
+        const diff = Math.abs(g2 - v2);
+        if (diff < bestDiff) {
+          bestDiff = diff;
+          best = i2;
+        }
+      });
+      return best;
+    })();
     gapSlider.value = String(curGap);
     const gapLab = document.createElement("div");
     gapLab.className = "opt-lab";
