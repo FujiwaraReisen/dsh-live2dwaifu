@@ -42,7 +42,7 @@
 <body>
 
 <h1>语料</h1>
-<p class="sub">喂她一些她说过的话，她就照着这个调子说。不用排版整齐，能读懂就行。</p>
+<p class="sub">把角色说过的话喂进来，之后说话就照这个调子。不用排版整齐，能读懂就行。</p>
 
 <div class="row">
   <select id="models"></select>
@@ -62,17 +62,18 @@
 他：今天吃啥
 你：锅里还有，热的。
 
-或者只贴她的台词，一行一句：
+或者只贴角色的台词，一行一句：
 锅里还有，热的。
 先坐下。水在桌上。
 
-也支持她说过的话带引号：「嗯。我也是。」"></textarea>
-    <div id="drop">把 .txt / .json / .jsonl 拖到这里，或者点一下选文件（可以多选）</div>
-    <input id="files" type="file" multiple accept=".txt,.json,.jsonl,.csv" style="display:none" />
+也支持带引号的一句：「嗯。我也是。」"></textarea>
+    <div id="drop">拖文件进来，或者点一下选（可以多选）<br /><span style="font-size:11px">文本、字幕、表格都认；图片和视频见下面</span></div>
+    <input id="files" type="file" multiple accept=".txt,.json,.jsonl,.csv,.md,.srt,.vtt,.ass,image/*,video/*" style="display:none" />
     <div class="tips">
-      认得的写法：<code>他：… / 你：…</code>、<code>「…」</code>、<code>- …</code>、一行一句、
-      JSON 数组 <code>[{"user":"…","assistant":"…"}]</code>。<br />
-      说话人写对才分得清谁说的：他/我/用户 算你，你/她/助手 算她；认不出的一律当她说的。
+      认得的写法：<code>对方：… / 角色：…</code>、<code>「…」</code>、<code>- …</code>、一行一句、
+      JSON 数组、字幕文件 <code>.srt / .vtt / .ass</code>（会自动去掉时间轴）。<br />
+      说话人对得上才分得清是谁：他/我/用户/对方 算对方，你/她/角色/助手 算角色；认不出来的一律算角色说的。<br />
+      图片和视频：暂时不进语料。图片可以留着当形象参考，视频建议先导出字幕文件，或者把台词复制进来。
     </div>
   </div>
 
@@ -128,7 +129,12 @@
         } catch (e) { /* 不是 JSON，按普通行处理 */ }
       }
 
+      // 字幕文件：跳过序号、时间轴、文件头
+      if (/^\d+$/.test(line)) continue;
+      if (/-->/.test(line)) continue;
+      if (/^(WEBVTT|NOTE|STYLE|REGION)/i.test(line)) continue;
       line = line.replace(/^[-*•·]\s*/, '');
+      line = line.replace(/<[^>]+>/g, '');
       var m = line.match(SPEAK);
       if (m) {
         var who = m[1].trim();
@@ -235,14 +241,32 @@
 
   function readFiles(list) {
     if (!list.length) return;
-    $('state').textContent = '读文件…';
-    var left = list.length;
+    var texts = [];
+    var skipped = [];
     list.forEach(function (f) {
+      var name = String(f.name || '').toLowerCase();
+      if (f.type.indexOf('image/') === 0 || /\.(png|jpe?g|webp|gif|bmp)$/.test(name)) {
+        skipped.push(f.name + '（图片）');
+        return;
+      }
+      if (f.type.indexOf('video/') === 0 || /\.(mp4|mkv|mov|avi|webm|flv)$/.test(name)) {
+        skipped.push(f.name + '（视频）');
+        return;
+      }
+      texts.push(f);
+    });
+    if (skipped.length) {
+      $('saved').textContent = '这些没读：' + skipped.join('、') + ' —— 图片先留着当形象参考，视频请导出字幕(.srt)或直接贴台词。';
+    }
+    if (!texts.length) { $('state').textContent = '没有可读的文本'; return; }
+    $('state').textContent = '读文件…';
+    var left = texts.length;
+    texts.forEach(function (f) {
       var reader = new FileReader();
       reader.onload = function () {
         files.push(String(reader.result || ''));
         left -= 1;
-        if (left === 0) { $('state').textContent = '读好了 ' + files.length + ' 个文件'; reparse(); }
+        if (left === 0) { $('state').textContent = '读好了 ' + texts.length + ' 个文件'; reparse(); }
       };
       reader.onerror = function () { left -= 1; if (left === 0) reparse(); };
       reader.readAsText(f, 'utf-8');
