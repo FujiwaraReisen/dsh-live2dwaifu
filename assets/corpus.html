@@ -37,6 +37,12 @@
   .tips { color:#6f7783; font-size:11.5px; line-height:1.8; margin-top:10px; }
   code { background:rgba(255,255,255,.06); border-radius:4px; padding:1px 5px; font-size:11px; }
   .state { color:var(--dim); font-size:11.5px; margin-left:auto; }
+
+  .sheet-close { position: fixed; right: 18px; top: 14px; z-index: 20;
+    padding: 7px 14px; border-radius: 9px; border: 1px solid rgba(255,255,255,.16);
+    background: rgba(30,36,45,.92); color: #dfe4ec; font: inherit; font-size: 12px;
+    cursor: pointer; backdrop-filter: blur(6px); }
+  .sheet-close:hover { background: rgba(46,55,68,.96); }
 </style>
 </head>
 <body>
@@ -308,6 +314,16 @@
     modelId = e.target.value;
     load();
   });
+})();
+</script>
+<button id="sheet-close" class="sheet-close">关掉</button>
+
+<script>
+(function () {
+  var b = document.getElementById('sheet-close');
+  if (b) b.onclick = function () {
+    try { window.parent.postMessage({ type: 'dsh-live2d/close' }, '*'); } catch (e) {}
+  };
 })();
 </script>
 </body>

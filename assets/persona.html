@@ -35,6 +35,12 @@
   button.act:hover { filter:brightness(1.12); }
   .state { color:var(--dim); font-size:11px; margin-left:auto; }
   .tip { color:#6f7783; font-size:11px; margin-top:10px; line-height:1.7; }
+
+  .sheet-close { position: fixed; right: 18px; top: 14px; z-index: 20;
+    padding: 7px 14px; border-radius: 9px; border: 1px solid rgba(255,255,255,.16);
+    background: rgba(30,36,45,.92); color: #dfe4ec; font: inherit; font-size: 12px;
+    cursor: pointer; backdrop-filter: blur(6px); }
+  .sheet-close:hover { background: rgba(46,55,68,.96); }
 </style>
 </head>
 <body>
@@ -143,6 +149,16 @@
       load();
     })
     .catch(function (e) { state.textContent = '读不了模型表：' + e.message; });
+})();
+</script>
+<button id="sheet-close" class="sheet-close">关掉</button>
+
+<script>
+(function () {
+  var b = document.getElementById('sheet-close');
+  if (b) b.onclick = function () {
+    try { window.parent.postMessage({ type: 'dsh-live2d/close' }, '*'); } catch (e) {}
+  };
 })();
 </script>
 </body>
