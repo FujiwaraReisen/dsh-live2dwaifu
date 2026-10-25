@@ -44316,6 +44316,7 @@ void main(void)\r
   var gazeY = 0;
   var pokeAt = 0;
   var sayFade = 0;
+  var lastSayAt = 0;
   var motionGroups = [];
   var nextMotionAt = 0;
   var POKE_HEAD = ["\u5514\u3002", "\u522B\u6478\u3002", "\u5934\u53D1\u4E71\u4E86\u3002", "\u55EF\u2026\u2026", "\u4F60\u624B\u51C9\u3002"];
@@ -44383,6 +44384,40 @@ void main(void)\r
       row.appendChild(document.createTextNode(label));
       box.appendChild(row);
     }
+    const hp = document.createElement("h3");
+    hp.textContent = "\u8868\u60C5\u5305\u51FA\u73B0\u7684\u4F4D\u7F6E";
+    box.appendChild(hp);
+    const posWrap = document.createElement("div");
+    posWrap.className = "opt-col";
+    const posSlider = document.createElement("input");
+    posSlider.type = "range";
+    posSlider.min = "0";
+    posSlider.max = String(IMG_POS.length - 1);
+    posSlider.step = "1";
+    const curPos = Math.max(0, IMG_POS.indexOf(imgPos()));
+    posSlider.value = String(curPos);
+    const posLab = document.createElement("div");
+    posLab.className = "opt-lab";
+    posLab.textContent = IMG_POS_LABELS[curPos];
+    posSlider.oninput = () => {
+      posLab.textContent = IMG_POS_LABELS[Number(posSlider.value)];
+    };
+    posSlider.onchange = () => {
+      setImgPos(IMG_POS[Number(posSlider.value)]);
+      const bubble = $2("bubble");
+      const shown = bubble ? bubble.querySelector(".bub-img") : null;
+      const pushed = $2("sticker") ? $2("sticker").querySelector(".stk-img") : null;
+      const src = shown && shown.src || pushed && pushed.src || "";
+      if (shown && shown.parentNode) shown.parentNode.removeChild(shown);
+      if (src && bubble) placeImage(bubble, src);
+    };
+    const posNote = document.createElement("div");
+    posNote.className = "opt-note";
+    posNote.textContent = "\u8BF4\u8BDD\u65F6\u914D\u56FE\u51FA\u5728\u54EA\u513F\u3002\u8D34\u5728\u6587\u5B57\u5DE6\u8FB9\u6216\u4E0A\u65B9\u90FD\u8DDF\u6C14\u6CE1\u4E00\u8D77\u8D70\uFF1B\u5361\u7247\u5DE6\u4E0A\u89D2\u662F\u5355\u72EC\u6D6E\u4E00\u5F20\uFF0C\u4E0D\u6324\u6C14\u6CE1\u3002";
+    posWrap.appendChild(posSlider);
+    posWrap.appendChild(posLab);
+    posWrap.appendChild(posNote);
+    box.appendChild(posWrap);
     const h2 = document.createElement("h3");
     h2.textContent = "\u5BF9\u8BDD\u4E0E\u884C\u4E3A\uFF08\u5B58\u670D\u52A1\u7AEF\uFF09";
     box.appendChild(h2);
@@ -44704,6 +44739,47 @@ void main(void)\r
     await refresh(true);
     $2("drawer").classList.remove("show");
   }
+  var IMG_POS = ["side", "above", "corner", "off"];
+  var IMG_POS_LABELS = ["\u6587\u5B57\u5DE6\u8FB9", "\u6587\u5B57\u4E0A\u65B9", "\u5361\u7247\u5DE6\u4E0A\u89D2", "\u8BF4\u8BDD\u4E0D\u914D\u56FE"];
+  function imgPos() {
+    let v2 = "";
+    try {
+      v2 = localStorage.getItem("dsh-l2d-imgpos") || "";
+    } catch {
+      v2 = "";
+    }
+    return IMG_POS.indexOf(v2) >= 0 ? v2 : "side";
+  }
+  function setImgPos(v2) {
+    try {
+      localStorage.setItem("dsh-l2d-imgpos", v2);
+    } catch {
+    }
+  }
+  function hideSticker() {
+    const st = $2("sticker");
+    if (st) st.style.opacity = "0";
+  }
+  function placeImage(bubble, image) {
+    const pos = imgPos();
+    hideSticker();
+    bubble.classList.toggle("img-above", pos === "above");
+    bubble.classList.toggle("img-side", pos === "side");
+    if (!image || pos === "off") return;
+    const img = document.createElement("img");
+    img.src = String(image);
+    if (pos === "corner") {
+      const st = $2("sticker");
+      if (!st) return;
+      img.className = "stk-img";
+      st.innerHTML = "";
+      st.appendChild(img);
+      st.style.opacity = "1";
+      return;
+    }
+    img.className = "bub-img";
+    bubble.insertBefore(img, bubble.firstChild);
+  }
   function say(text, m2, image) {
     if (m2) applyMood(m2);
     const bubble = $2("bubble");
@@ -44711,14 +44787,11 @@ void main(void)\r
     if (s2.length > 180) s2 = s2.slice(0, 178) + "\u2026";
     bubble.textContent = "";
     bubble.style.opacity = "1";
+    lastSayAt = Date.now();
     clearTimeout(sayFade);
-    if (image) {
-      const img = document.createElement("img");
-      img.className = "bub-img";
-      img.src = String(image);
-      bubble.appendChild(img);
-    }
+    placeImage(bubble, image);
     const holder = document.createElement("div");
+    holder.className = "bub-txt";
     bubble.appendChild(holder);
     const chars = Array.from(s2);
     let i2 = 0;
@@ -44729,6 +44802,7 @@ void main(void)\r
         if (chars.length) blip(tone.base * 0.82, tone.dur * 1.6, tone.type);
         sayFade = setTimeout(() => {
           bubble.style.opacity = "0";
+          hideSticker();
         }, Math.min(14e3, 4e3 + chars.length * 110));
         return;
       }
@@ -44743,6 +44817,9 @@ void main(void)\r
   }
   var idleIdx = 0;
   function idleTick() {
+    const bubble = $2("bubble");
+    if (Date.now() - lastSayAt < 45e3) return;
+    if (bubble && bubble.style.opacity !== "0" && bubble.textContent.trim()) return;
     const line = IDLE_LINES[idleIdx++ % IDLE_LINES.length];
     if (line) say(line, mood);
   }
