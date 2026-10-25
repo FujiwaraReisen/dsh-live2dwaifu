@@ -44418,6 +44418,49 @@ void main(void)\r
     posWrap.appendChild(posLab);
     posWrap.appendChild(posNote);
     box.appendChild(posWrap);
+    const hi = document.createElement("h3");
+    hi.textContent = "\u6CA1\u4EBA\u7684\u65F6\u5019\u81EA\u5DF1\u8BF4\u4E24\u53E5";
+    box.appendChild(hi);
+    const idleWrap = document.createElement("div");
+    idleWrap.className = "opt-col";
+    const idleRow = document.createElement("label");
+    idleRow.className = "opt";
+    idleRow.title = "\u5BF9\u8BDD\u6846\u7A7A\u7740\u7684\u65F6\u5019\uFF0C\u5979\u81EA\u5DF1\u5192\u4E00\u53E5\u5F88\u77ED\u7684\u8BDD";
+    const idleCb = document.createElement("input");
+    idleCb.type = "checkbox";
+    const idleCur = idleCfg();
+    idleCb.checked = idleCur.on;
+    idleCb.onchange = () => {
+      setIdleCfg({ on: idleCb.checked });
+      idleSlider.disabled = !idleCb.checked;
+    };
+    idleRow.appendChild(idleCb);
+    idleRow.appendChild(document.createTextNode("\u5F00\u7740"));
+    idleWrap.appendChild(idleRow);
+    const idleSlider = document.createElement("input");
+    idleSlider.type = "range";
+    idleSlider.min = "0";
+    idleSlider.max = String(IDLE_GAPS.length - 1);
+    idleSlider.step = "1";
+    const curIdle = Math.max(0, IDLE_GAPS.indexOf(idleCur.gap));
+    idleSlider.value = String(curIdle);
+    idleSlider.disabled = !idleCur.on;
+    const idleLab = document.createElement("div");
+    idleLab.className = "opt-lab";
+    idleLab.textContent = "\u9694 " + IDLE_LABELS[curIdle];
+    idleSlider.oninput = () => {
+      idleLab.textContent = "\u9694 " + IDLE_LABELS[Number(idleSlider.value)];
+    };
+    idleSlider.onchange = () => {
+      setIdleCfg({ gap: IDLE_GAPS[Number(idleSlider.value)] });
+    };
+    const idleNote = document.createElement("div");
+    idleNote.className = "opt-note";
+    idleNote.textContent = "\u7A7A\u7740\u6CA1\u8BDD\u8BF4\u7684\u65F6\u5019\uFF0C\u8FC7\u4E00\u4F1A\u513F\u5192\u4E00\u53E5\u5F88\u77ED\u7684\u788E\u8BDD\u3002\u521A\u8BF4\u8FC7\u8BDD\u3001\u6216\u8005\u6C14\u6CE1\u8FD8\u6302\u7740\uFF0C\u5C31\u4E0D\u63D2\u5634\u3002";
+    idleWrap.appendChild(idleSlider);
+    idleWrap.appendChild(idleLab);
+    idleWrap.appendChild(idleNote);
+    box.appendChild(idleWrap);
     const h2 = document.createElement("h3");
     h2.textContent = "\u5BF9\u8BDD\u4E0E\u884C\u4E3A\uFF08\u5B58\u670D\u52A1\u7AEF\uFF09";
     box.appendChild(h2);
@@ -44756,6 +44799,25 @@ void main(void)\r
     } catch {
     }
   }
+  var IDLE_GAPS = [3e4, 6e4, 12e4, 3e5, 6e5];
+  var IDLE_LABELS = ["30 \u79D2", "1 \u5206\u949F", "2 \u5206\u949F", "5 \u5206\u949F", "10 \u5206\u949F"];
+  function idleCfg() {
+    let raw = {};
+    try {
+      raw = JSON.parse(localStorage.getItem("dsh-l2d-idle") || "{}") || {};
+    } catch {
+      raw = {};
+    }
+    const gap = IDLE_GAPS.indexOf(Number(raw.gap)) >= 0 ? Number(raw.gap) : 12e4;
+    return { on: raw.on !== false, gap };
+  }
+  function setIdleCfg(patch) {
+    const next = { ...idleCfg(), ...patch };
+    try {
+      localStorage.setItem("dsh-l2d-idle", JSON.stringify(next));
+    } catch {
+    }
+  }
   function hideSticker() {
     const st = $2("sticker");
     if (st) st.style.opacity = "0";
@@ -44817,8 +44879,10 @@ void main(void)\r
   }
   var idleIdx = 0;
   function idleTick() {
+    const cfg = idleCfg();
+    if (!cfg.on) return;
     const bubble = $2("bubble");
-    if (Date.now() - lastSayAt < 45e3) return;
+    if (Date.now() - lastSayAt < cfg.gap) return;
     if (bubble && bubble.style.opacity !== "0" && bubble.textContent.trim()) return;
     const line = IDLE_LINES[idleIdx++ % IDLE_LINES.length];
     if (line) say(line, mood);
@@ -44896,10 +44960,9 @@ void main(void)\r
   window.addEventListener("resize", () => setTimeout(fit, 60));
   loadSettings();
   refresh(true).then(() => {
-    if (state.models.length) setTimeout(idleTick, 2500);
     setInterval(() => {
       if (state.models.length && !$2("drawer").classList.contains("show")) idleTick();
-    }, 9e3);
+    }, 2e3);
   });
   function renderExps() {
     const box = $2("exps");
