@@ -50,20 +50,20 @@
 
 <div class="left">
   <div class="card"><iframe id="live" src="/dsh-live2d/viewer?embed=1"></iframe></div>
-  <div class="tip">没声音就先点她一下——浏览器要一次点击才允许出声。</div>
+  <div class="tip">没有声音时，先点击一次页面——浏览器要求先有用户操作才允许播放。</div>
 </div>
 
 <div class="panel">
-  <h1>音色</h1>
-  <p class="sub">一个字一声短音。音量 0 就是安静，只留气泡和口型。</p>
+  <h1>声音</h1>
+  <p class="sub">每说一个字发一声短音。音量调到 0 即静音，只保留文字和口型。</p>
 
   <div class="group">
-    <h2>配给哪个模型</h2>
+    <h2>目标模型</h2>
     <select id="models"></select>
   </div>
 
   <div class="group">
-    <h2>音色</h2>
+    <h2>音色预设</h2>
     <div class="presets" id="presets">
       <button data-p="soft" class="on">柔和</button>
       <button data-p="crisp">清脆</button>
@@ -82,19 +82,19 @@
   </div>
 
   <div class="group">
-    <h2>试一句</h2>
+    <h2>试听</h2>
     <div class="typebox">
       <input id="text" value="窗台那盆，红了。" />
-      <button class="act primary" id="say">说</button>
+      <button class="act primary" id="say">播放</button>
     </div>
   </div>
 
   <div class="foot">
-    <button class="act primary" id="save">存到这只模型</button>
+    <button class="act primary" id="save">保存</button>
     <button class="act" id="reset">恢复默认</button>
     <span class="state" id="state"></span>
   </div>
-  <div class="tip">每只模型各存一份。换模型、换人，声音跟着换。</div>
+  <div class="tip">每只模型单独保存一份音色设置。</div>
 </div>
 
 <script>
@@ -185,12 +185,12 @@
     voice = Object.assign({}, DEFAULTS);
     show();
     pushTone();
-    state.textContent = '已恢复默认，还没存';
+    state.textContent = '已恢复默认值，尚未保存';
   });
 
   $('save').addEventListener('click', function () {
     if (!modelId) return;
-    state.textContent = '存…';
+    state.textContent = '保存中';
     fetch('/dsh-live2d/api/voice', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -198,9 +198,9 @@
     })
       .then(function (r) { return r.json(); })
       .then(function (d) {
-        state.textContent = d.ok ? '存好了' : '没存上：' + (d.error || '?');
+        state.textContent = d.ok ? '已保存' : '保存失败：' + (d.error || '未知错误');
       })
-      .catch(function (e) { state.textContent = '没存上：' + e.message; });
+      .catch(function (e) { state.textContent = '保存失败：' + e.message; });
   });
 
   sel.addEventListener('change', function () {
@@ -210,7 +210,7 @@
 
   function loadVoice(alsoSwitch) {
     if (!modelId) return;
-    state.textContent = '读…';
+    state.textContent = '读取中';
     if (alsoSwitch) {
       fetch('/dsh-live2d/api/select', {
         method: 'POST',
@@ -227,9 +227,9 @@
         show();
         pushTone();
         setTimeout(pushTone, 900);
-        state.textContent = '读好了';
+        state.textContent = '已读取';
       })
-      .catch(function (e) { state.textContent = '读不了：' + e.message; });
+      .catch(function (e) { state.textContent = '读取失败：' + e.message; });
   }
 
   fetch('/dsh-live2d/api/models')
@@ -246,12 +246,12 @@
       modelId = d.selected || (list[0] && list[0].id) || '';
       if (modelId) sel.value = modelId;
       if (!list.length) {
-        state.textContent = '还没有模型';
+        state.textContent = '尚未导入模型';
         return;
       }
       loadVoice(false);
     })
-      .catch(function (e) { state.textContent = '读不了模型表：' + e.message; });
+      .catch(function (e) { state.textContent = '读取模型列表失败：' + e.message; });
 
   frame.addEventListener('load', function () {
     pushTone();

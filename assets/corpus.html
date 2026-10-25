@@ -48,32 +48,32 @@
 <body>
 
 <h1>语料</h1>
-<p class="sub">把角色说过的话喂进来，之后说话就照这个调子。不用排版整齐，能读懂就行。</p>
+<p class="sub">导入角色说过的话，作为生成回复时的语气参考。不要求格式整齐，能解析即可。</p>
 
 <div class="row">
   <select id="models"></select>
   <div class="btns">
-    <button class="act" id="pick">选文件</button>
-    <button class="act primary" id="append">加进去</button>
-    <button class="act" id="replace">替换成这些</button>
+    <button class="act" id="pick">选择文件</button>
+    <button class="act primary" id="append">追加保存</button>
+    <button class="act" id="replace">覆盖保存</button>
   </div>
   <span class="state" id="state"></span>
 </div>
 
 <div class="cols">
   <div class="col box">
-    <h2>把话贴进来</h2>
-    <textarea id="raw" spellcheck="false" placeholder="随便贴，几种写法都认：
+    <h2>粘贴文本</h2>
+    <textarea id="raw" spellcheck="false" placeholder="直接粘贴，支持以下几种写法：
 
-他：今天吃啥
-你：锅里还有，热的。
+对方：今天忙吗
+角色：刚坐下，手还是湿的。
 
-或者只贴角色的台词，一行一句：
-锅里还有，热的。
-先坐下。水在桌上。
+或者只粘贴角色台词，一行一句：
+刚坐下，手还是湿的。
+水在桌上。
 
-也支持带引号的一句：「嗯。我也是。」"></textarea>
-    <div id="drop">拖文件进来，或者点一下选（可以多选）<br /><span style="font-size:11px">文本、字幕、表格都认；图片和视频见下面</span></div>
+也支持带引号的一句：「嗯，我也是。」"></textarea>
+    <div id="drop">拖放文件到此处，或点击选择文件（支持多选）<br /><span style="font-size:11px">支持文本、字幕、表格；图片与视频见下方说明</span></div>
     <input id="files" type="file" multiple accept=".txt,.json,.jsonl,.csv,.md,.srt,.vtt,.ass,image/*,video/*" style="display:none" />
     <div class="tips">
       认得的写法：<code>对方：… / 角色：…</code>、<code>「…」</code>、<code>- …</code>、一行一句、
@@ -84,8 +84,8 @@
   </div>
 
   <div class="col box">
-    <h2>解析出来长这样</h2>
-    <div class="stat" id="stat">还没有内容</div>
+    <h2>解析结果</h2>
+    <div class="stat" id="stat">暂无内容</div>
     <div id="preview"></div>
     <div class="tips" id="saved"></div>
   </div>
@@ -168,10 +168,10 @@
     box.innerHTML = '';
     var show = [];
     for (var i = 0; i < parsed.pairs.length && show.length < 8; i += 1) {
-      show.push('他：' + parsed.pairs[i].user + '<br>你：' + parsed.pairs[i].assistant);
+      show.push('对方：' + parsed.pairs[i].user + '<br>角色：' + parsed.pairs[i].assistant);
     }
     for (var j = 0; j < parsed.lines.length && show.length < 14; j += 1) {
-      show.push('你：' + parsed.lines[j]);
+      show.push('角色：' + parsed.lines[j]);
     }
     show.forEach(function (html) {
       var d = document.createElement('div');
@@ -191,15 +191,15 @@
 
   function load() {
     if (!modelId) return;
-    $('state').textContent = '读…';
+    $('state').textContent = '读取中';
     fetch('/dsh-live2d/api/corpus?id=' + encodeURIComponent(modelId))
       .then(function (r) { return r.json(); })
       .then(function (d) {
         stored = { lines: d.lines || [], pairs: d.pairs || [] };
-        $('state').textContent = '读好了';
+        $('state').textContent = '已读取';
         render();
       })
-      .catch(function (e) { $('state').textContent = '读不了：' + e.message; });
+      .catch(function (e) { $('state').textContent = '读取失败：' + e.message; });
   }
 
   function save(mode) {
@@ -214,10 +214,10 @@
       };
     }
     if (!payload.lines.length && !payload.pairs.length) {
-      $('state').textContent = '没有可存的内容';
+      $('state').textContent = '没有可保存的内容';
       return;
     }
-    $('state').textContent = '存…';
+    $('state').textContent = '保存中';
     fetch('/dsh-live2d/api/corpus', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -225,13 +225,13 @@
     })
       .then(function (r) { return r.json(); })
       .then(function (d) {
-        if (!d.ok) { $('state').textContent = '没存上：' + (d.error || '?'); return; }
-        $('state').textContent = '存好了，共 ' + d.total + ' 条';
+        if (!d.ok) { $('state').textContent = '保存失败：' + (d.error || '未知错误'); return; }
+        $('state').textContent = '已保存，共 ' + d.total + ' 条';
         $('raw').value = '';
         files = [];
         load();
       })
-      .catch(function (e) { $('state').textContent = '没存上：' + e.message; });
+      .catch(function (e) { $('state').textContent = '保存失败：' + e.message; });
   }
 
   $('raw').addEventListener('input', reparse);
@@ -262,17 +262,17 @@
       texts.push(f);
     });
     if (skipped.length) {
-      $('saved').textContent = '这些没读：' + skipped.join('、') + ' —— 图片先留着当形象参考，视频请导出字幕(.srt)或直接贴台词。';
+      $('saved').textContent = '未读取：' + skipped.join('、') + '。图片可留作形象参考；视频请先导出字幕（.srt）或直接粘贴台词。';
     }
-    if (!texts.length) { $('state').textContent = '没有可读的文本'; return; }
-    $('state').textContent = '读文件…';
+    if (!texts.length) { $('state').textContent = '没有可读取的文本文件'; return; }
+    $('state').textContent = '正在读取文件';
     var left = texts.length;
     texts.forEach(function (f) {
       var reader = new FileReader();
       reader.onload = function () {
         files.push(String(reader.result || ''));
         left -= 1;
-        if (left === 0) { $('state').textContent = '读好了 ' + texts.length + ' 个文件'; reparse(); }
+        if (left === 0) { $('state').textContent = '已读取 ' + texts.length + ' 个文件'; reparse(); }
       };
       reader.onerror = function () { left -= 1; if (left === 0) reparse(); };
       reader.readAsText(f, 'utf-8');
@@ -305,10 +305,10 @@
       });
       modelId = d.selected || (list[0] && list[0].id) || '';
       if (modelId) sel.value = modelId;
-      if (!list.length) { $('state').textContent = '还没有模型'; return; }
+      if (!list.length) { $('state').textContent = '尚未导入模型'; return; }
       load();
     })
-    .catch(function (e) { $('state').textContent = '读不了模型表：' + e.message; });
+    .catch(function (e) { $('state').textContent = '读取模型列表失败：' + e.message; });
 
   $('models').addEventListener('change', function (e) {
     modelId = e.target.value;

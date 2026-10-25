@@ -47,20 +47,20 @@
 
 <div class="left">
   <div class="card"><iframe id="live" src="/dsh-live2d/viewer?embed=1"></iframe></div>
-  <div class="tip">左边就是她本人。改完存一下，她下一句就按新的人设说。</div>
+  <div class="tip">左侧是当前模型预览。保存后，下一次回答就会按新的设定生成。</div>
 </div>
 
 <div class="panel">
   <h1>人设卡</h1>
-  <p class="sub">她是谁、怎么说话，全在这段字里。</p>
+  <p class="sub">角色的身份、性格、说话方式，都写在这里。</p>
 
   <div class="group">
-    <h2>配给哪个模型</h2>
+    <h2>目标模型</h2>
     <select id="models"></select>
   </div>
 
   <div class="group">
-    <h2>人设</h2>
+    <h2>角色设定</h2>
     <textarea id="persona" spellcheck="false"></textarea>
   </div>
 
@@ -69,18 +69,18 @@
     <label class="switch">
       <input type="checkbox" id="isolation" checked />
       <span>
-        <b>让她待在自己的世界里</b>
-        <em>打开后，她不知道什么是程序、界面、插件、模型。问起来就当你在她身边，不提“系统”“设置”“网页”。关掉她就会老老实实承认自己是插件里的角色。</em>
+        <b>角色视角隔离</b>
+        <em>打开后，角色不会提到程序、界面、插件、模型这些词，按设定世界的视角回答。关闭后角色会承认自己是插件里的角色。</em>
       </span>
     </label>
   </div>
 
   <div class="foot">
-    <button class="act primary" id="save">存</button>
-    <button class="act" id="reload">撤销改动</button>
+    <button class="act primary" id="save">保存</button>
+    <button class="act" id="reload">放弃修改</button>
     <span class="state" id="state"></span>
   </div>
-  <div class="tip">存在 <code>~/.dsh/dsh-live2d/models/&lt;id&gt;/meta.json</code> 的 <code>persona</code> 字段里，想手改也行。</div>
+  <div class="tip">保存在 <code>~/.dsh/dsh-live2d/models/&lt;id&gt;/meta.json</code> 的 <code>persona</code> 字段，也可以直接编辑该文件。</div>
 </div>
 
 <script>
@@ -96,20 +96,20 @@
 
   function load() {
     if (!modelId) return;
-    state.textContent = '读…';
+    state.textContent = '读取中';
     fetch('/dsh-live2d/api/persona?id=' + encodeURIComponent(modelId))
       .then(function (r) { return r.json(); })
       .then(function (d) {
         area.value = d.persona || '';
         iso.checked = d.isolation !== false;
-        state.textContent = d.custom ? '这份是手写的' : '还是默认那份';
+        state.textContent = d.custom ? '已自定义' : '使用默认设定';
       })
-      .catch(function (e) { state.textContent = '读不了：' + e.message; });
+      .catch(function (e) { state.textContent = '读取失败：' + e.message; });
   }
 
   function save() {
     if (!modelId) return;
-    state.textContent = '存…';
+    state.textContent = '保存中';
     fetch('/dsh-live2d/api/persona', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -117,12 +117,12 @@
     })
       .then(function (r) { return r.json(); })
       .then(function (d) {
-        state.textContent = d.ok ? '存好了' : '没存上：' + (d.error || '?');
+        state.textContent = d.ok ? '已保存' : '保存失败：' + (d.error || '未知错误');
         if (d.ok) {
           frame.src = '/dsh-live2d/viewer?embed=1&t=' + Date.now();
         }
       })
-      .catch(function (e) { state.textContent = '没存上：' + e.message; });
+      .catch(function (e) { state.textContent = '保存失败：' + e.message; });
   }
 
   $('save').addEventListener('click', save);
@@ -145,10 +145,10 @@
       });
       modelId = d.selected || (list[0] && list[0].id) || '';
       if (modelId) sel.value = modelId;
-      if (!list.length) { state.textContent = '还没有模型'; return; }
+      if (!list.length) { state.textContent = '尚未导入模型'; return; }
       load();
     })
-    .catch(function (e) { state.textContent = '读不了模型表：' + e.message; });
+    .catch(function (e) { state.textContent = '读取模型列表失败：' + e.message; });
 })();
 </script>
 <button id="sheet-close" class="sheet-close">关掉</button>
