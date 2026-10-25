@@ -44345,10 +44345,11 @@ void main(void)\r
     ["follow", "\u590D\u8FF0\u804A\u5929\u5185\u5BB9"]
   ];
   var SERVER_OPTS = [
-    ["proactive", "\u95F2\u7F6E\u65F6\u4E3B\u52A8\u8BF4\u8BDD"],
     ["choices", "\u56DE\u590D\u9644\u5E26\u9009\u9879\u6309\u94AE"],
     ["memory", "\u8BB0\u4F4F\u804A\u8FC7\u7684\u5185\u5BB9"]
   ];
+  var GAP_LABELS = ["\u5173\u95ED", "30 \u5206\u949F", "1 \u5C0F\u65F6", "2 \u5C0F\u65F6", "4 \u5C0F\u65F6"];
+  var GAP_VALUES = [0, 30, 60, 120, 240];
   var LOCAL_HINT = {
     gaze: "\u89D2\u8272\u7684\u773C\u775B\u548C\u5934\u4F1A\u8DDF\u7740\u9F20\u6807\u79FB\u52A8",
     poke: "\u70B9\u89D2\u8272\u7684\u4E0D\u540C\u90E8\u4F4D\u4F1A\u6709\u4E0D\u540C\u53CD\u5E94",
@@ -44406,6 +44407,44 @@ void main(void)\r
       row.appendChild(document.createTextNode(label));
       box.appendChild(row);
     }
+    const hg = document.createElement("h3");
+    hg.textContent = "\u95F2\u7F6E\u4E3B\u52A8\u8BF4\u8BDD\u7684\u95F4\u9694";
+    box.appendChild(hg);
+    const gapWrap = document.createElement("div");
+    gapWrap.className = "opt-col";
+    const gapSlider = document.createElement("input");
+    gapSlider.type = "range";
+    gapSlider.min = "0";
+    gapSlider.max = String(GAP_VALUES.length - 1);
+    gapSlider.step = "1";
+    const curGap = Math.max(
+      0,
+      GAP_VALUES.indexOf(Number(serverSettings.proactiveInterval ?? 30))
+    );
+    gapSlider.value = String(curGap);
+    const gapLab = document.createElement("div");
+    gapLab.className = "opt-lab";
+    gapLab.textContent = GAP_LABELS[curGap];
+    gapSlider.oninput = () => {
+      gapLab.textContent = GAP_LABELS[Number(gapSlider.value)];
+    };
+    gapSlider.onchange = () => {
+      const v2 = GAP_VALUES[Number(gapSlider.value)];
+      serverSettings.proactiveInterval = v2;
+      fetch(BASE + "/api/settings", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ settings: { proactiveInterval: v2 } })
+      }).catch(() => {
+      });
+    };
+    const gapNote = document.createElement("div");
+    gapNote.className = "opt-note";
+    gapNote.textContent = "\u591A\u4E45\u6CA1\u6709\u5BF9\u8BDD\u4E4B\u540E\uFF0C\u89D2\u8272\u4E3B\u52A8\u8BF4\u4E00\u53E5\u3002\u9009\u300C\u5173\u95ED\u300D\u5C31\u4E0D\u4F1A\u81EA\u5DF1\u5F00\u53E3\u3002";
+    gapWrap.appendChild(gapSlider);
+    gapWrap.appendChild(gapLab);
+    gapWrap.appendChild(gapNote);
+    box.appendChild(gapWrap);
     const h3 = document.createElement("h3");
     h3.textContent = "\u8868\u60C5\u5305\uFF08\u6D4B\u8BD5\u529F\u80FD\uFF09";
     box.appendChild(h3);
