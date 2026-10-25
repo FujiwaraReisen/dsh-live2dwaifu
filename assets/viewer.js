@@ -44448,10 +44448,28 @@ void main(void)\r
     };
     const gapNote = document.createElement("div");
     gapNote.className = "opt-note";
-    gapNote.textContent = "\u591A\u4E45\u6CA1\u6709\u5BF9\u8BDD\u4E4B\u540E\uFF0C\u89D2\u8272\u4E3B\u52A8\u8BF4\u4E00\u53E5\u3002\u9009\u300C\u5173\u95ED\u300D\u5C31\u4E0D\u4F1A\u81EA\u5DF1\u5F00\u53E3\u3002";
+    gapNote.textContent = "\u591A\u4E45\u6CA1\u6709\u5BF9\u8BDD\u4E4B\u540E\uFF0C\u89D2\u8272\u4E3B\u52A8\u8BF4\u4E00\u53E5\u3002\u5B9E\u9645\u4F1A\u6309\u8FD9\u4E2A\u6570\u4E0A\u4E0B\u6D6E\u52A8\uFF0C\u4E0D\u662F\u51C6\u70B9\uFF1B\u591C\u91CC 0 \u70B9\u5230 7 \u70B9\u4E0D\u5F00\u53E3\u3002\u9009\u300C\u5173\u95ED\u300D\u5C31\u4E0D\u4F1A\u81EA\u5DF1\u5F00\u53E3\u3002";
+    const gapTry = document.createElement("button");
+    gapTry.className = "opt-btn";
+    gapTry.textContent = "\u8BA9\u5979\u73B0\u5728\u8BF4\u4E00\u53E5";
+    gapTry.onclick = () => {
+      gapTry.disabled = true;
+      gapTry.textContent = "\u5728\u60F3\u2026";
+      fetch(BASE + "/api/talk", { method: "POST" }).then((r2) => r2.json()).then((d2) => {
+        gapTry.textContent = d2 && d2.ok ? "\u8BF4\u4E86" : "\u6CA1\u8BF4\u8BDD";
+      }).catch(() => {
+        gapTry.textContent = "\u6CA1\u8BF4\u8BDD";
+      }).then(() => {
+        setTimeout(() => {
+          gapTry.disabled = false;
+          gapTry.textContent = "\u8BA9\u5979\u73B0\u5728\u8BF4\u4E00\u53E5";
+        }, 2400);
+      });
+    };
     gapWrap.appendChild(gapSlider);
     gapWrap.appendChild(gapLab);
     gapWrap.appendChild(gapNote);
+    gapWrap.appendChild(gapTry);
     box.appendChild(gapWrap);
     const h3 = document.createElement("h3");
     h3.textContent = "\u8868\u60C5\u5305\uFF08\u6D4B\u8BD5\u529F\u80FD\uFF09";
