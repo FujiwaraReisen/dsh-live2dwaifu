@@ -44693,6 +44693,15 @@ void main(void)\r
   });
   window.__live2d = { say, mood: applyMood, refresh };
   $2("import").onclick = () => $2("files").click();
+  var corpusBtn = $2("corpus");
+  if (corpusBtn) {
+    corpusBtn.onclick = () => {
+      try {
+        window.parent.postMessage({ type: "dsh-live2d/open", sheet: "corpus" }, "*");
+      } catch {
+      }
+    };
+  }
   $2("close").onclick = () => $2("drawer").classList.remove("show");
   $2("files").onchange = (e2) => importFolder(e2.target.files);
   function moodValue(id) {
