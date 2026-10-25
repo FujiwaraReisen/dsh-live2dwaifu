@@ -91,6 +91,7 @@
 
   <div class="foot">
     <button class="act primary" id="save">保存</button>
+    <button class="act" id="useModel">切到这只模型</button>
     <button class="act" id="reset">恢复默认</button>
     <span class="state" id="state"></span>
   </div>
@@ -205,21 +206,27 @@
 
   sel.addEventListener('change', function () {
     modelId = sel.value;
-    loadVoice(true);
+    loadVoice();
   });
 
-  function loadVoice(alsoSwitch) {
+  $('useModel').addEventListener('click', function () {
+    if (!modelId) return;
+    state.textContent = '切换中';
+    fetch('/dsh-live2d/api/select', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id: modelId })
+    })
+      .then(function () {
+        frame.src = '/dsh-live2d/viewer?embed=1&t=' + Date.now();
+        state.textContent = '已切换';
+      })
+      .catch(function (e) { state.textContent = '切换失败：' + e.message; });
+  });
+
+  function loadVoice() {
     if (!modelId) return;
     state.textContent = '读取中';
-    if (alsoSwitch) {
-      fetch('/dsh-live2d/api/select', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ id: modelId })
-      }).then(function () {
-        frame.src = '/dsh-live2d/viewer?embed=1&t=' + Date.now();
-      });
-    }
     fetch('/dsh-live2d/api/voice?id=' + encodeURIComponent(modelId))
       .then(function (r) { return r.json(); })
       .then(function (d) {
@@ -249,7 +256,7 @@
         state.textContent = '尚未导入模型';
         return;
       }
-      loadVoice(false);
+      loadVoice();
     })
       .catch(function (e) { state.textContent = '读取模型列表失败：' + e.message; });
 

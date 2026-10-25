@@ -71,6 +71,7 @@
   // 主动开口也收着
   var seq = null;
   setInterval(function () {
+    if (document.hidden) return;
     fetch('/dsh-live2d/api/poll?since=' + (seq === null ? 0 : seq))
       .then(function (r) { return r.json(); })
       .then(function (d) {

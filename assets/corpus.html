@@ -147,11 +147,10 @@
         var said = unquote(m[2]);
         if (!said) continue;
         if (USERS.test(who)) { pending = said; continue; }
-        if (HERS.test(who) || true) {
-          pairs.push({ user: pending || '', assistant: said });
-          pending = null;
-          continue;
-        }
+        // 不是「他/我/用户」的说话人，一律当角色
+        pairs.push({ user: pending || '', assistant: said });
+        pending = null;
+        continue;
       }
       var t = unquote(line);
       if (t) lines.push(t);
